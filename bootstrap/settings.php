@@ -3,7 +3,7 @@
 // Настройки
 $settings = [
     'path' => __DIR__.'/..',
-    'users' => ['admin4'	=> 'password']
+    'users' => ['admin5'	=> 'password']
 ];
 
 // ...
