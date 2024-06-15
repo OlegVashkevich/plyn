@@ -1,0 +1,19 @@
+<div class="form-group{% if property.required %} required{% endif %}">
+	<label for="{{ property.name }}" class="col-sm-2 control-label">{{ property.description }}</label>
+	<div class="col-sm-10">
+		<input type="file" class="form-control" id="{{ property.name }}" name="{{ property.name }}" {% if
+			property.required %}{% if bean[property.name] is not defined or bean[property.name] is empty %}
+			required="required" {% endif %}{% endif %}>
+		{% if bean[property.name] is defined and bean[property.name] is not empty %}
+		<span class="help-block">
+			{% if bean[property.name]|split('.')|last|lower in ['jpg','jpeg','gif','png'] %}
+			<a href="{{ bean[property.name] }}" target="_blank">
+				<img src="{{ bean[property.name] }}" width="50">
+			</a>
+			{% else %}
+			<a href="{{ bean[property.name] }}" target="_blank">{{ bean[property.name] }}</a>
+			{% endif %}
+		</span>
+		{% endif %}
+	</div>
+</div>

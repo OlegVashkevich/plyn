@@ -1,0 +1,56 @@
+{% set title = 'Наши книги' %}
+
+{% extends "public/layout.html" %}
+
+{% block content %}
+
+<div class="page-header">
+	<h1>Взгляните на наши книги!</h1>
+</div>
+
+<form class="form-horizontal" method="get" action="/book/search">
+	<div class="form-group">
+		<div class="col-auto">
+			<input type="text" class="form-input" name="*has" placeholder="Поиск">
+		</div>
+		<div class="col-auto">
+			<button type="submit" class="btn btn-primary">Искать</button>
+		</div>
+	</div>
+</form>
+
+<hr>
+
+<p>У нас есть прекрасный выбор книг. Проверьте их и познакомьтесь с их авторами.</p>
+
+{% if books|length > 0 %}
+<div class="columns">
+	{% for book in books %}
+	<div class="column col-6 col-xs-12">
+		<div class="card">
+			<div class="card-image">
+				<img src="{{ book.picture }}" alt="{{ book.title }}" class="img-responsive">
+			</div>
+			<div class="card-header">
+				<h3>{{ book.title }}</h3>
+			</div>
+			<div class="divider"></div>
+			<div class="card-body">
+				{{ book.description }}
+			</div>
+			<div class="divider"></div>
+			<div class="card-footer">
+				<a href="{{ url_for('book', { 'slug': book.slug }) }}" class="btn btn-primary" role="button">Взгляните
+					на эту книгу</a>
+			</div>
+
+		</div>
+	</div>
+	{% endfor %}
+</div>
+{% else %}
+<hr>
+<p class="text-muted text-center">Извините, сейчас у нас нет книг....</p>
+{% endif %}
+
+{% endblock content %}

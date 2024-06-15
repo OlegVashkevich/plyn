@@ -1,0 +1,60 @@
+{% set title = book.title %}
+
+{% extends "public/layout.html" %}
+
+{% block content %}
+
+<div class="page-header">
+	<h1>Книга: {{ book.title }}</h1>
+</div>
+
+<div class="row">
+	<div class="col-sm-4">
+		<div class="thumbnail">
+			<img src="{{ book.picture }}" alt="{{ book.title }}">
+		</div>
+	</div>
+	<div class="col-sm-8">
+		<p>{{ book.description }}</p>
+	</div>
+</div>
+
+<h2>Автор</h2>
+{% if book.author|length > 0 %}
+<div class="row">
+	{% for member in book.author %}
+	<div class="col-sm-3">
+		<div class="thumbnail">
+			<img src="{{ member.picture }}" alt="{{ member.title }}">
+			<div class="caption">
+				<h3>{{ member.title }}</h3>
+				<p>{{ member.bio }}</p>
+			</div>
+		</div>
+	</div>
+	{% if loop.index % 4 == 0 %}
+</div>
+<div class="row">
+	{% endif %}
+	{% endfor %}
+</div>
+{% else %}
+<hr>
+<p class="text-muted text-center">Извините, у этой книги нет автора ...</p>
+{% endif %}
+
+<h2>Жанры</h2>
+
+{% if book.genre|length > 0 %}
+<div class="row">
+	<div class="col-sm-12">
+		<h4>{{ book.genre.title }}</h4>
+		<p>{{ book.genre.description }}</p>
+	</div>
+</div>
+{% else %}
+<hr>
+<p class="text-muted text-center">Извините, у этой книги нет жанра ...</p>
+{% endif %}
+
+{% endblock content %}
