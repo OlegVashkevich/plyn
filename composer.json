@@ -25,7 +25,9 @@
 		"siriusphp/validation": "^3.1",
 		"siriusphp/upload": "^3.0",
 		"hashids/hashids": "^5.0",
-		"tuupola/slim-basic-auth": "^3.3"
+		"tuupola/slim-basic-auth": "^3.3",
+		"ext-zip": "*",
+		"ext-pdo_sqlite": "*"
 	},
     "autoload": {
 		"psr-4": { "Plyn\\": "src/" }

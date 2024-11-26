@@ -9,5 +9,6 @@
 ### Установка
 - создать директорию под проект
 - клонировать репозиторий ```git clone https://github.com/OlegVashkevich/plyn.git .```
+- проверить требования ```composer check-platform-reqs```
 - подтянуть зависимости композера ```composer update```
 - запустить временный сервер ```composer start``` или настроить веб-сервер на директорию public
