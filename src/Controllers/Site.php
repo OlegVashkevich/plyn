@@ -3,59 +3,60 @@
 namespace Plyn\Controllers;
 
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ServerRequestInterface as SRequestInterface;
 use Psr\Container\ContainerInterface;
 
 class Site
 {
     private $container;
- 
+
     public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
     }
 
-    public function main(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
+    public function main(SRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
     {
-        $book = new \Plyn\Models\Example\Book;
+        $book = new \Plyn\Models\Example\Book();
         // показать список книг
         return $this->container->get('view')->render(
-            $response, 
-            'public/index.html', 
+            $response,
+            'public/index.html',
             [ 'books' => $book->read() ]
         );
     }
 
-    public function book(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
+    public function book(SRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
     {
-        $book = new \Plyn\Models\Example\Book;
+        $book = new \Plyn\Models\Example\Book();
 
         return $this->container->get('view')->render(
-            $response, 
+            $response,
             'public/book.html',
-            [ 'book' => $book->read( $args['slug'], 'slug' ) ]
+            [ 'book' => $book->read($args['slug'], 'slug') ]
         );
     }
 
-    public function search(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
+    public function search(SRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
     {
         $search = new \Plyn\Core\Search('Example', 'book');
         return $this->container->get('view')->render(
-            $response, 
-            'public/search.html', 
+            $response,
+            'public/search.html',
             [
-                'search' => $search->find( $request->getQueryParams() ),
+                'search' => $search->find($request->getQueryParams()),
                 'query' => $request->getQueryParams()['*has']
             ]
         );
     }
 
-    public function staticpage(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
+    public function staticpage(SRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
     {
-        $slug = str_replace(array('../','./'), '', $args['slug']); // remove parent path components if request is trying to be sneaky
-	
-        if (file_exists( $this->container->get('view')->getLoader()->getPaths()[0] .'/static/'.$slug.'.html')) {
-            return $this->container->get('view')->render($response, 'static/'.$slug.'.html');
-        } 
+        // удаляем компоненты родительского пути, если запрос пытается быть скрытным
+        $slug = str_replace(array('../','./'), '', $args['slug']);
+
+        if (file_exists($this->container->get('view')->getLoader()->getPaths()[0] . '/static/' . $slug . '.html')) {
+            return $this->container->get('view')->render($response, 'static/' . $slug . '.html');
+        }
     }
 }

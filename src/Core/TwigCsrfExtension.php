@@ -10,7 +10,7 @@ class TwigCsrfExtension extends \Twig\Extension\AbstractExtension implements \Tw
      * @var Guard
      */
     protected $csrf;
-    
+
     public function __construct(Guard $csrf)
     {
         $this->csrf = $csrf;

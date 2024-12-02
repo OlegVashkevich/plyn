@@ -9,7 +9,6 @@ use Slim\Csrf\Guard;
 use Slim\Flash\Messages;
 
 return [
-  
     //общие настройки и переменные приложения
     'settings' => function () {
         return require __DIR__ . '/settings.php';
@@ -27,14 +26,14 @@ return [
     },
 
     //шаблонизатор
-    'view' => function(ContainerInterface $container) {
-      return Twig::create(
-        __DIR__ . '/../views', 
-        [
-          'cache' => false,//__DIR__ . '/../storage/cache',
-          'debug' => false
-        ]
-      );
+    'view' => function (ContainerInterface $container) {
+        return Twig::create(
+            __DIR__ . '/../views',
+            [
+                'cache' => false,//__DIR__ . '/../storage/cache',
+                'debug' => false
+            ]
+        );
     },
 
     //csrf - защита от межсайтовой подделки запроса

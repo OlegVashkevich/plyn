@@ -36,7 +36,7 @@ return function (App $app) {
     $app->add(
         function ($request, $next) {
             $this->get('view')->addExtension(new \Plyn\Core\TwigCsrfExtension($this->get('csrf')));
-            $this->get('view')->addExtension(new \Twig\Extension\DebugExtension ());
+            $this->get('view')->addExtension(new \Twig\Extension\DebugExtension());
             return $next->handle($request);
         }
     );

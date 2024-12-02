@@ -12,7 +12,7 @@ class ErrorRenderer implements ErrorRendererInterface
 {
     private Twig $twig;
     private ResponseFactoryInterface $responseFactory;
- 
+
     public function __construct(App $app)
     {
         $this->twig = $app->getContainer()->get('view');
@@ -33,10 +33,11 @@ class ErrorRenderer implements ErrorRendererInterface
 
         $response = $this->responseFactory->createResponse();
 
-        if($exception->getCode() == 404)
+        if ($exception->getCode() == 404) {
             $result = (string)$this->twig->render($response, 'static/404.html', $viewData)->getBody();
-        else
+        } else {
             $result = (string)$this->twig->render($response, 'static/error.html', $viewData)->getBody();
+        }
 
         return $result;
     }

@@ -6,73 +6,71 @@ namespace Plyn\Models\Example;
  * Example Plyn content model
  */
 
-class Book extends \Plyn\Core\Model {
+class Book extends \Plyn\Core\Model
+{
+    public function __construct()
+    {
+        parent::__construct();
 
-	function __construct() {
-		parent::__construct();
+        $this->type = 'book';
 
-		$this->type = 'book';
-		
-		// Description in admin interface
-		$this->description = 'Книга — это один из видов печатной продукции.';
+        // Description in admin interface
+        $this->description = 'Книга — это один из видов печатной продукции.';
 
-		$this->properties = [
-			// Allways have a title
-			[
-				'name' => 'title',
-				'description' => 'Название',
-				'required' => true,
-				'searchable' => true,
-				'type' => '\Plyn\Property\Str',
-				'input' => 'text'
-			],
-			[
-				'name' => 'description',
-				'description' => 'Описание',
-				'searchable' => true,
-				'type' => '\Plyn\Property\Str',
-				'input' => 'textarea'
-			],
-			[
-				'name' => 'picture',
-				'description' => 'Изображение',
-				'required' => true,
-				'type' => '\Plyn\Property\Fileselect',
-				'extensions' => 'jpeg,jpg,gif,png', // Allowed extensions
-				'directory' => '/files', // Directory relative to PATH (no trailing slash)
-				'input' => 'fileselect'
-			],
-			[
-				'name' => 'position',
-				'description' => 'Порядок',
-				'autovalue' => true,
-				'type' => '\Plyn\Property\Position',
-				'input' => 'text'
-			],
-			[
-				'name' => 'slug',
-				'description' => 'Символьный код',
-				'autovalue' => true,
-				'type' => '\Plyn\Property\Slug',
-				'input' => 'text'
-			],
-			[
-				'name' => 'author',
-				'description' => 'Автор',
-				'required' => true,
-				'type' => '\Plyn\Property\Manytomany',
-				'input' => 'tomany'
-			],
-			[
-				'name' => 'genre',
-				'description' => 'Жанры',
-				'required' => true,
-				'type' => '\Plyn\Property\Manytoone',
-				'input' => 'manytoone'
-			]
-		];
-	}
-
+        $this->properties = [
+            // Allways have a title
+            [
+                'name' => 'title',
+                'description' => 'Название',
+                'required' => true,
+                'searchable' => true,
+                'type' => '\Plyn\Property\Str',
+                'input' => 'text'
+            ],
+            [
+                'name' => 'description',
+                'description' => 'Описание',
+                'searchable' => true,
+                'type' => '\Plyn\Property\Str',
+                'input' => 'textarea'
+            ],
+            [
+                'name' => 'picture',
+                'description' => 'Изображение',
+                'required' => true,
+                'type' => '\Plyn\Property\Fileselect',
+                'extensions' => 'jpeg,jpg,gif,png', // Allowed extensions
+                'directory' => '/files', // Directory relative to PATH (no trailing slash)
+                'input' => 'fileselect'
+            ],
+            [
+                'name' => 'position',
+                'description' => 'Порядок',
+                'autovalue' => true,
+                'type' => '\Plyn\Property\Position',
+                'input' => 'text'
+            ],
+            [
+                'name' => 'slug',
+                'description' => 'Символьный код',
+                'autovalue' => true,
+                'type' => '\Plyn\Property\Slug',
+                'input' => 'text'
+            ],
+            [
+                'name' => 'author',
+                'description' => 'Автор',
+                'required' => true,
+                'type' => '\Plyn\Property\Manytomany',
+                'input' => 'tomany'
+            ],
+            [
+                'name' => 'genre',
+                'description' => 'Жанры',
+                'required' => true,
+                'type' => '\Plyn\Property\Manytoone',
+                'input' => 'manytoone'
+            ]
+        ];
+    }
 }
-
-?>

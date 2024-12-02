@@ -6,40 +6,38 @@ namespace Plyn\Models\Example;
  * Example Plyn content model
  */
 
-class Genre extends \Plyn\Core\Model {
+class Genre extends \Plyn\Core\Model
+{
+    public function __construct()
+    {
+        parent::__construct();
 
-	function __construct() {
-		parent::__construct();
-		
-		$this->type = 'genre';
-		
-		// Description in admin interface
-		$this->description = 'Жанры книг.';
+        $this->type = 'genre';
 
-		$this->properties = [
-			// Allways have a title
-			[
-				'name' => 'title',
-				'description' => 'Название',
-				'required' => true,
-				'type' => '\Plyn\Property\Str',
-				'input' => 'text'
-			],
-			[
-				'name' => 'description',
-				'description' => 'Описание',
-				'type' => '\Plyn\Property\Str',
-				'input' => 'textarea'
-			],
-			[
-				'name' => 'book',
-				'description' => 'Книги',
-				'type' => '\Plyn\Property\Onetomany',
-				'input' => 'tomany'
-			]
-		];
-	}
+        // Description in admin interface
+        $this->description = 'Жанры книг.';
 
+        $this->properties = [
+            // Allways have a title
+            [
+                'name' => 'title',
+                'description' => 'Название',
+                'required' => true,
+                'type' => '\Plyn\Property\Str',
+                'input' => 'text'
+            ],
+            [
+                'name' => 'description',
+                'description' => 'Описание',
+                'type' => '\Plyn\Property\Str',
+                'input' => 'textarea'
+            ],
+            [
+                'name' => 'book',
+                'description' => 'Книги',
+                'type' => '\Plyn\Property\Onetomany',
+                'input' => 'tomany'
+            ]
+        ];
+    }
 }
-
-?>
