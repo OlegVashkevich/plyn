@@ -7,7 +7,6 @@ use Psr\Http\Message\ServerRequestInterface as SRequestInterface;
 use Psr\Container\ContainerInterface;
 use RedBeanPHP\R as R;
 use Plyn\Core\RouteHelper;
-use Slim\Routing\RouteContext;
 use Plyn\Core\Search;
 
 class Api
@@ -66,7 +65,7 @@ class Api
             ];
 
             // Search
-            $search = new \Plyn\Core\Search('Example', $args['beantype']);
+            $search = new Search('Example', $args['beantype']);
             $data['search'] = $search->find($request->getQueryParams());
             //R::exportAll( $search->find( $request->getQueryParams() ) );
 

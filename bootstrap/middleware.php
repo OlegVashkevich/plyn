@@ -3,8 +3,9 @@
 use Slim\App;
 use Slim\Middleware\MethodOverrideMiddleware;
 use Slim\Views\TwigMiddleware;
-use Slim\Csrf\Guard;
 use Plyn\Core\ErrorRenderer;
+use Plyn\Core\TwigCsrfExtension;
+use Twig\Extension\DebugExtension;
 
 return function (App $app) {
     // Разбор json, данных формы и xml
@@ -35,8 +36,8 @@ return function (App $app) {
     // Добавляем расширения для Twig
     $app->add(
         function ($request, $next) {
-            $this->get('view')->addExtension(new \Plyn\Core\TwigCsrfExtension($this->get('csrf')));
-            $this->get('view')->addExtension(new \Twig\Extension\DebugExtension());
+            $this->get('view')->addExtension(new TwigCsrfExtension($this->get('csrf')));
+            $this->get('view')->addExtension(new DebugExtension());
             return $next->handle($request);
         }
     );

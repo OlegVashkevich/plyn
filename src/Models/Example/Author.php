@@ -2,11 +2,13 @@
 
 namespace Plyn\Models\Example;
 
+use Plyn\Core\Model;
+
 /**
  * Example Plyn content model
  */
 
-class Author extends \Plyn\Core\Model
+class Author extends Model
 {
     public function __construct()
     {

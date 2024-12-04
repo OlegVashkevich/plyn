@@ -1,12 +1,10 @@
 <?php
 
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
 use Slim\App;
 use Slim\Routing\RouteCollectorProxy;
-use Plyn\Core\RouteHelper;
-use Slim\Routing\RouteContext;
-use Plyn\Core\Search;
+use Plyn\Controllers\Site;
+use Plyn\Controllers\Admin;
+use Plyn\Controllers\Api;
 
 return function (App $app) {
 
@@ -18,27 +16,27 @@ return function (App $app) {
     // помощью промежуточного программного обеспечения базовой аутентификации HTTP.
     $app->group('/admin', function (RouteCollectorProxy $admingroup) {
 
-        $admingroup->get('[/]', '\Plyn\Controllers\Admin:main')->setName('admin');
+        $admingroup->get('[/]', Admin::class . ':main')->setName('admin');
 
         // Маршруты для сущностей
         $admingroup->group('/{beantype}', function (RouteCollectorProxy $beantypegroup) {
             // Список
-            $beantypegroup->get('[/]', '\Plyn\Controllers\Admin:listbeans')->setName('listbeans');
+            $beantypegroup->get('[/]', Admin::class . ':listbeans')->setName('listbeans');
 
             // Форма добавления
-            $beantypegroup->get('/add', '\Plyn\Controllers\Admin:addbean')->setName('addbean');
+            $beantypegroup->get('/add', Admin::class . ':addbean')->setName('addbean');
 
             // Просмотр
-            $beantypegroup->get('/{id}', '\Plyn\Controllers\Admin:getbean')->setName('getbean');
+            $beantypegroup->get('/{id}', Admin::class . ':getbean')->setName('getbean');
 
             // Создание
-            $beantypegroup->post('[/]', '\Plyn\Controllers\Admin:postbean')->setName('postbean');
+            $beantypegroup->post('[/]', Admin::class . ':postbean')->setName('postbean');
 
             // Обновление
-            $beantypegroup->put('/{id}', '\Plyn\Controllers\Admin:putbean')->setName('putbean');
+            $beantypegroup->put('/{id}', Admin::class . ':putbean')->setName('putbean');
 
             // Удаление
-            $beantypegroup->delete('/{id}', '\Plyn\Controllers\Admin:deletebean')->setName('deletebean');
+            $beantypegroup->delete('/{id}', Admin::class . ':deletebean')->setName('deletebean');
         });
     });
 
@@ -48,13 +46,13 @@ return function (App $app) {
      *
      */
     // Главная
-    $app->get('/', '\Plyn\Controllers\Site:main');
+    $app->get('/', Site::class . ':main');
 
     // Поиск
-    $app->get('/book/search', '\Plyn\Controllers\Site:search');
+    $app->get('/book/search', Site::class . ':search');
 
     // Просмотр статьи
-    $app->get('/book/{slug}', '\Plyn\Controllers\Site:book')->setName('book');
+    $app->get('/book/{slug}', Site::class . ':book')->setName('book');
 
 
     /**
@@ -67,16 +65,16 @@ return function (App $app) {
         // Read requires no authentication
         $apigroup->group('/read', function (RouteCollectorProxy $apiread) {
 
-            $apiread->get('[/]', '\Plyn\Controllers\Api:readmain');
+            $apiread->get('[/]', Api::class . ':readmain');
 
             // Route of a certain type of bean
             $apiread->group('/{beantype}', function (RouteCollectorProxy $apireadtype) {
 
                 // List
-                $apireadtype->get('[/]', '\Plyn\Controllers\Api:readtype');
+                $apireadtype->get('[/]', Api::class . ':readtype');
 
                 // Existing bean
-                $apireadtype->get('/{id}', '\Plyn\Controllers\Api:readone');
+                $apireadtype->get('/{id}', Api::class . ':readone');
             });
         });
 
@@ -87,13 +85,13 @@ return function (App $app) {
             $apiwrite->group('/{beantype}', function (RouteCollectorProxy $apiwritetype) {
 
                 // Add
-                $apiwritetype->post('[/]', '\Plyn\Controllers\Api:add');
+                $apiwritetype->post('[/]', Api::class . 'Api:add');
 
                 // Update
-                $apiwritetype->put('/{id}', '\Plyn\Controllers\Api:update');
+                $apiwritetype->put('/{id}', Api::class . 'Api:update');
 
                 // Delete
-                $apiwritetype->delete('/{id}', '\Plyn\Controllers\Api:delete');
+                $apiwritetype->delete('/{id}', Api::class . 'Api:delete');
             });
         });
     });
@@ -103,5 +101,5 @@ return function (App $app) {
      *
      */
 
-    $app->get('/{slug}', '\Plyn\Controllers\Site:staticpage');
+    $app->get('/{slug}', Site::class . ':staticpage');
 };

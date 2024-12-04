@@ -5,6 +5,8 @@ namespace Plyn\Controllers;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface as SRequestInterface;
 use Psr\Container\ContainerInterface;
+use Plyn\Core\Search;
+use Plyn\Models\Example\Book;
 
 class Site
 {
@@ -17,7 +19,8 @@ class Site
 
     public function main(SRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
     {
-        $book = new \Plyn\Models\Example\Book();
+        $book = new Book();
+
         // показать список книг
         return $this->container->get('view')->render(
             $response,
@@ -28,7 +31,7 @@ class Site
 
     public function book(SRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
     {
-        $book = new \Plyn\Models\Example\Book();
+        $book = new Book();
 
         return $this->container->get('view')->render(
             $response,
@@ -39,7 +42,7 @@ class Site
 
     public function search(SRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
     {
-        $search = new \Plyn\Core\Search('Example', 'book');
+        $search = new Search('Example', 'book');
         return $this->container->get('view')->render(
             $response,
             'public/search.html',

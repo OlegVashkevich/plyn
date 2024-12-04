@@ -3,8 +3,10 @@
 namespace Plyn\Core;
 
 use Slim\Csrf\Guard;
+use Twig\Extension\AbstractExtension;
+use Twig\Extension\GlobalsInterface;
 
-class TwigCsrfExtension extends \Twig\Extension\AbstractExtension implements \Twig\Extension\GlobalsInterface
+class TwigCsrfExtension extends AbstractExtension implements GlobalsInterface
 {
     /**
      * @var Guard

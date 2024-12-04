@@ -1,12 +1,11 @@
 <?php
 
 use Psr\Container\ContainerInterface;
-use Slim\App;
 use Slim\Factory\AppFactory;
 use Slim\Views\Twig;
-use Slim\Views\TwigMiddleware;
 use Slim\Csrf\Guard;
 use Slim\Flash\Messages;
+use Tuupola\Middleware\HttpBasicAuthentication;
 
 return [
     //общие настройки и переменные приложения
@@ -50,7 +49,7 @@ return [
 
     //базовая авторизация для админки
     'auth' => function (ContainerInterface $container) {
-        return new \Tuupola\Middleware\HttpBasicAuthentication([
+        return new HttpBasicAuthentication([
           'path' => ['/admin'],
           "realm" => "Protected",
           "secure" => false,
