@@ -24,8 +24,7 @@ use RedBeanPHP\R as R;
  * Примеры структур запросов:
  * [model]?*has=[search string] : Поиск всех доступных для поиска свойств модели
  * [model]?[property]*has=[search string] : Поиск одного свойства модели
- * [model]?[property]*min=[number]
- * sort=[property]*asc
+ * [model]?[property]*min=[number]&sort=[property]*asc
  * [model]?description*title*has=[search string]&title*has=[search string]&sort=title*asc&offset=10&limit=100
  *
  */
