@@ -3,24 +3,24 @@
 namespace Plyn\Core;
 
 /**
- * Route helper functions
+ * Функции поставщика сущностей
  */
 
-class RouteHelper
+class EntityProvider
 {
     /**
-     * Set up a controller for a bean type.
+     * Подключение модели для типа сущности.
      *
-     * @var string $beantype The type of bean.
+     * @var string $beantype Тип сущности.
      *
-     * @return object The controller.
+     * @return object Модель.
      */
     public static function setupBeanModel($path, $module, $beantype)
     {
         //$module = strtolower( $module );
         $beantype = ucfirst(strtolower($beantype));
         if (!file_exists($path . '/Models/' . $module . '/' . $beantype . '.php')) {
-            throw new \Exception('The ' . $beantype . ' model does not exist.');
+            throw new \Exception('Модель ' . $beantype . ' не существует.');
         }
         // Return model
         $model_name = '\Plyn\Models\\' . ucfirst($module) . '\\' . $beantype;
@@ -28,9 +28,9 @@ class RouteHelper
     }
 
     /**
-     * Get all bean types from the models/plyn directory
+     * Получает все типы сущностей из каталога models/module/plyn
      *
-     * @return string[] Array with names of all bean types
+     * @return string[] Массив с именами всех типов сущностей
      */
     public static function getBeantypes($path, $module)
     {

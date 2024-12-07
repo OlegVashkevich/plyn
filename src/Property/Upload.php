@@ -5,30 +5,29 @@ namespace Plyn\Property;
 use Sirius\Upload\Handler as UploadHandler;
 
 /**
- * Controller for the Plyn upload property.
- * Lets the user upload a file. Uses https://github.com/siriusphp/upload
+ * Контроллер для свойства загрузки.
+ * Позволяет пользователю загружать файл. Использует https://github.com/siriusphp/upload
  *
- * A property type controller can contain a set, read, delete and options method. All methods are optional.
+ * Контроллер типа свойства может содержать методы set, read, delete и options. Все методы являются необязательными.
  */
 
 class Upload
 {
     /**
-     * The set method is executed each time a property with this type is set.
+     * Метод set выполняется каждый раз, когда устанавливается свойство с этим типом.
      *
-     * @param bean $bean The Redbean bean object with the property.
-     * @param array $property Plyn model property arrray.
-     * @param string $new_value
+     * @param bean $bean Объект bean Readbean для этого свойства.
+     * @param array $property Массив свойств модели Plyn.
      *
-     * @return string If a new file is uploaded it returns the new file path relative to PATH.
-     * For validation pusposes, if a new file is not uploaded, it returns the current value.
+     * @return string Если загружен новый файл, он возвращает новый путь к файлу относительно PATH.
+     * Для целей проверки, если новый файл не загружен, он возвращает текущее значение.
      */
     public function set($bean, $property, $new_value)
     {
         if (isset($_FILES[ $property['name'] ]) && $_FILES[ $property['name'] ]['size'] > 0) {
             $uploadHandler = new UploadHandler(__DIR__ . '/../../public' . $property['directory']);
 
-            // Validation
+            // Проверка
             if (isset($property['validate'])) {
                 foreach ($property['validate'] as $rule) {
                     $uploadHandler->addRule($rule[0], $rule[1]);
@@ -39,17 +38,17 @@ class Upload
 
             if ($result->isValid()) {
                 try {
-                    $result->confirm(); // this will remove the .lock file
-                    $this->delete($bean, $property); // Delete old file
+                    $result->confirm(); // это удалит файл .lock
+                    $this->delete($bean, $property); // Удалияем старый файл
                     return $property['directory'] . '/' . $result->name;
                 } catch (\Exception $e) {
-                    // something wrong happened, we don't need the uploaded files anymore
+                    // что-то пошло не так, загруженные файлы нам больше не нужны
                     $result->clear();
                     throw $e;
                 }
             } else {
-                // File was not moved to the container, where are error messages
-                throw new \Exception('Upload error. ' . implode(', ', $result->getMessages()));
+                // Файл не был перемещен в контейнер
+                throw new \Exception('Ошибка загрузки. ' . implode(', ', $result->getMessages()));
             }
         } elseif ($bean->{ $property['name'] }) {
             return $bean->{ $property['name'] };
@@ -57,15 +56,15 @@ class Upload
     }
 
     /**
-     * The delete method is executed each time a an object with a property with this type is deleted.
+     * Метод delete выполняется каждый раз при удалении объекта со свойством этого типа.
      *
-     * @param bean $bean The Redbean bean object with the property.
-     * @param array $property Plyn model property arrray.
+     * @param bean $bean Объект bean Readbean для этого свойства.
+     * @param array $property Массив свойств модели Plyn.
      */
     public function delete($bean, $property)
     {
-        // Delete file
-        $path = __DIR__ . '/../../public' . $property['directory']; // Prevent deleting files outside the upload path
+        // Удаляем файл
+        $path = __DIR__ . '/../../public' . $property['directory'];
         $file = __DIR__ . '/../../public' . $bean->{ $property['name'] };
         if (file_exists($file) && substr($file, 0, strlen($path)) == $path) {
             unlink($file);

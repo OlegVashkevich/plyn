@@ -5,23 +5,23 @@ namespace Plyn\Property;
 use RedBeanPHP\R as R;
 
 /**
- * Controller for the Plyn slug property.
- * Creates a slug from a string, and checks if it's unique.
+ * Контроллер для свойства символьного кода Plyn.
+ * Создает символьный код из строки и проверяет, является ли он уникальным.
  *
- * A property type controller can contain a set, read, delete and options method. All methods are optional.
+ * Контроллер типа свойства может содержать методы set, read, delete и options. Все методы являются необязательными.
  */
 
 class Slug
 {
     /**
-     * The set method is executed each time a property with this type is set.
-     * If $new_value is not set, the slug is based on bean title.
+     * Метод set выполняется каждый раз, когда устанавливается свойство с этим типом.
+     * Если $new_value не установлен - символьный код берется из заголовка.
      *
-     * @param bean $bean The Redbean bean object with the property.
-     * @param array $property Plyn model property arrray.
-     * @param string $new_value The input string for the slug of the object with this property.
+     * @param bean $bean Объект компонента Redbean со свойством.
+     * @param array $property Массив свойств модели Plyn.
+     * @param string $new_value Входная строка для символьного кода объекта с этим свойством.
      *
-     * @return string The new slug of the object with this property.
+     * @return string Новый символьный код объекта с этим свойством.
      */
     public function set($bean, $property, $new_value)
     {
@@ -35,16 +35,15 @@ class Slug
     }
 
     /**
-     * Trim a string without cutting words.
-     * from http://www.justin-cook.com/wp/2006/06/27/php-trim-a-string-without-cutting-any-words/
+     * Обрезаем строку, не обрезая слова.
      *
-     * @param string $str String we are operating with
-     * @param inyteger $n Character count to cut to
-     * @param string $delim Delimiter. Default: ''
+     * @param string $str Строка, с которой мы работаем
+     * @param inyteger $n Количество символов для обрезки
+     * @param string $delim Разделитель. По умолчанию: ''
      *
-     * @return string The trimmed string.
+     * @return string Обрезанная строка.
      */
-    private function neatTrim($str, $n, $delim = '')
+    private function nTrim($str, $n, $delim = '')
     {
         $len = strlen($str);
         if ($len > $n) {
@@ -56,13 +55,13 @@ class Slug
     }
 
     /**
-     * Checks if the slug of a bean is unique
+     * Проверяет, является ли символьный код компонента уникальным
      *
-     * @param bean $bean The bean to check the slug for.
-     * @param string $property_name The name of the property to check the slug for.
-     * @param string $slug The slug to check.
+     * @param bean $bean Компонент, на наличие которого проверяется символьный код.
+     * @param string $property_name Имя свойства, на наличие которого проверяется символьный код.
+     * @param string $slug Символьный код, который проверяется.
      *
-     * @return boolean Returns true if the slug is unique, false otherwise.
+     * @return boolean Возвращает true, если символьный код уникален, и false в противном случае.
      */
     private function uniqueSlug($bean, $property_name, $slug)
     {
@@ -79,31 +78,30 @@ class Slug
     }
 
     /**
-     * Turn text string into a valid URL readable string.
-     * From http://stackoverflow.com/questions/2955251/php-function-to-make-slug-url-string
+     * Преобразовать текстовую строку в допустимую строку, пригодную для чтения в URL.
      *
-     * @param string $text String to convert.
+     * @param string $text Строка для преобразования.
      *
-     * @return string Converted string.
+     * @return string Преобразованная строка.
      */
     private function slugify($text)
     {
-        // replace non letter or digits by -
+        // заменить не букву или цифру на -
         $text = preg_replace('~[^\pL\d]+~u', '-', $text);
 
-        // transliterate
+        // транслитерирование
         $text = iconv('utf-8', 'us-ascii//TRANSLIT', $text);
 
-        // remove unwanted characters
+        // удалить нежелательные символы
         $text = preg_replace('~[^-\w]+~', '', $text);
 
-        // trim
+        // подрезка
         $text = trim($text, '-');
 
-        // remove duplicate -
+        // удаляем дубликаты -
         $text = preg_replace('~-+~', '-', $text);
 
-        // lowercase
+        // строчные буквы
         $text = strtolower($text);
 
         if (empty($text)) {
@@ -114,22 +112,22 @@ class Slug
     }
 
     /**
-     * Returns a unique slug for a bean with a maximum of 100 characters with complete words.
+     * Возвращает уникальный символьный код для компонента с максимальным количеством символов 100 с полными словами.
      *
-     * @param bean $bean The bean to create the slug for.
-     * @param string $property_name The property name to create the slug for.
-     * @param string $slug_string The input string for the slug.
+     * @param bean $bean Компонент, для которого создается символьный код.
+     * @param string $property_name Имя свойства, для которого создается символьный код.
+     * @param string $slug_string Входная строка для символьного кода.
      *
-     * @return string The slug.
+     * @return string Символьный код.
      */
     private function makeSlug($bean, $property_name, $slug_string)
     {
-        $string = $this->neatTrim($slug_string, 100); // Maximum of 100 characters with complete words
+        $string = $this->nTrim($slug_string, 100); // Максимум 100 символов с полными словами
         $slug = $this->slugify($string);
         if ($this->uniqueSlug($bean, $property_name, $slug)) {
             return $slug;
         } else {
-            // Create slug with uniqid() and check again
+            // Создаем символьный код с uniqid() и проверяем еще раз
             return $this->makeSlug($bean, $property_name, $slug . '-' . uniqid());
         }
     }

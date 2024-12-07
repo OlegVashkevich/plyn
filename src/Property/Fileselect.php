@@ -3,29 +3,29 @@
 namespace Plyn\Property;
 
 /**
- * Controller for the Plyn fileselect property.
- * Lets the user select a file from a directory.
+ * Контроллер для свойства выбора файлов Plyn.
+ * Позволяет пользователю выбрать файл из каталога.
  *
- * A property type controller can contain a set, read, delete and options method. All methods are optional.
+ * Контроллер типа свойства может содержать методы set, read, delete и options. Все методы являются необязательными.
  */
 
 class Fileselect
 {
     /**
-     * The options method returns all the optional values for this property.
-     * $property['pattern'] contains the glob pattern to find the matching pathnames.
+     * Метод options возвращает все необязательные значения для этого свойства.
+     * $property['pattern'] содержит шаблон glob для поиска соответствующих путей.
      *
-     * @param bean $bean The Redbean bean object with the property.
-     * @param array $property Plyn model property arrray.
+     * @param bean $bean Объект bean Readbean для этого свойства.
+     * @param array $property Массив свойств модели Plyn.
      *
-     * @return array Array with nested arrays containing the path and the name of the file.
+     * @return array Массив с вложенными массивами, содержащими путь и имя файла.
      */
     public function options($bean, $property)
     {
         $path = __DIR__ . '/../../public';
         $return = [];
-        $extensions = str_replace('', ' ', $property['extensions']); // Remove spaces
-        $pattern = $path . $property['directory'] . '/*.{' . $extensions . '}'; // glob pattern
+        $extensions = str_replace('', ' ', $property['extensions']); // Удаляем пробелы
+        $pattern = $path . $property['directory'] . '/*.{' . $extensions . '}'; // glob шаблон
         $files = glob($pattern, GLOB_BRACE);
         foreach ($files as $file) {
             $return[] = [

@@ -80,7 +80,7 @@
 					<form method="post" role="form" enctype="multipart/form-data"
 						action="{{ url_for('deletebean', { 'beantype': beantype, 'id': bean.id }) }}">
 						<input type="hidden" name="_METHOD" value="DELETE" />
-						<!-- CSRF Protection -->
+						<!-- CSRF -->
 						<input type="hidden" name="{{ csrf.keys.name }}" value="{{ csrf.name }}">
 						<input type="hidden" name="{{ csrf.keys.value }}" value="{{ csrf.value }}">
 						<button type="submit" class="btn btn-default btn-xs delete"
@@ -124,8 +124,9 @@
 
 <script type="text/javascript">
 
-	// Create a HTML form and submit it.
-	// This keeps the code more readable
+    // Для изменения позиции
+    // создаем HTML-форму и отправляем ее.
+    // Это делает код более читабельным
 	$('.move').on('click', function (e) {
 		e.preventDefault();
 		var newForm = $('<form>', {
@@ -153,7 +154,7 @@
 			'value': '{{ csrf.value }}'
 		}));
 		newForm.hide().appendTo('body');
-		$('#submit').click(); // Do it this way because submit button also has value.
+		$('#submit').click(); // Сделано таким образом, поскольку кнопка submit также имеет значение.
 	});
 
 	$('.delete').on('click', function (e) {

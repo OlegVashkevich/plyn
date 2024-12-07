@@ -5,29 +5,30 @@ namespace Plyn\Property;
 use RedBeanPHP\R as R;
 
 /**
- * Controller for the Plyn many-to-many property.
- * Lets the user define a many-to-many relation between two content entries.
- * The Manytomany property type controller enables a many-to-many relation between 2 Plyn models.
- * The name of the property should be the name of the Plyn model this model can have a many-to-many
- * relation with. For this to work properly the other model should have a many-to-many relation with this model as well.
- * So in our example in the Plyn project the Plyn Book model has a many-to-many relation
- * with the Plyn Genre model, and the Plyn Genre model has a many-to-many relation with the Plyn Book model.
+ * Контроллер для свойства Plyn «многие ко многим».
+ * Позволяет пользователю определить отношение «многие ко многим» между двумя записями контента.
+ * Контроллер типа свойства Manytomany позволяет установить отношение «многие ко многим» между 2 моделями Plyn.
+ * Имя свойства должно быть именем модели Plyn, с которой эта модель может иметь отношение «многие ко многим».
+ * Для правильной работы другая модель также должна иметь отношение «многие ко многим» с этой моделью.
+ * Таким образом, в нашем примере в проекте Plyn модель Plyn Book имеет отношение «многие ко многим»
+ * с моделью Plyn Author, а модель Plyn Author имеет отношение «многие ко многим» с моделью Plyn Book.
  *
- * A property type controller can contain a set, read, delete and options method. All methods are optional.
+ * Контроллер типа свойства может содержать методы set, read, delete и options. Все методы являются необязательными.
  */
 
 class Manytomany
 {
     /**
-     * The set method is executed each time a property with this type is set.
+     * Метод set выполняется каждый раз, когда устанавливается свойство с этим типом.
      *
-     * @param bean $bean The Redbean bean object with the property.
-     * @param array $property Plyn model property arrray.
-     * @param integer[] $new_value An array with id's of the objects
-     * the object with this property has a many-to-many relation with.
+     * @param bean $bean Объект bean Readbean для этого свойства.
+     * @param array $property Массив свойств модели Plyn.
+     * @param integer[] $new_value Массив с идентификаторами объектов,
+     * с которыми объект с этим свойством имеет отношение «многие ко многим».
      *
-     * @return boolean Returns a boolean because a many-to-many relation is
-     * automaticaly stored in a separate database table. Returns true if any relations are set, false if not.
+     * @return boolean Возвращает логическое значение, поскольку отношение «многие ко многим»
+     * автоматически сохраняется в отдельной таблице базы данных.
+     * Возвращает true, если какие-либо отношения установлены, false — если нет.
      */
     public function set($bean, $property, $new_value)
     {
@@ -49,33 +50,34 @@ class Manytomany
     }
 
     /**
-     * The read method is executed each time a property with this type is read.
+     * Метод read выполняется каждый раз при чтении свойства с этим типом.
      *
-     * @param bean $bean The Readbean bean object with this property.
-     * @param string[] $property Plyn model property arrray.
+     * @param bean $bean Объект bean Readbean для этого свойства.
+     * @param array $property Массив свойств модели Plyn.
      *
-     * @return bean[] Array with Redbean beans with a many-to-many relation with the entry with this property.
+     * @return bean[] Массив с компонентами Redbean, имеющими связь «многие ко многим» с записью,
+     * обладающей этим свойством.
      */
     public function read($bean, $property)
     {
-        // NOTE: We're not executing the read method for each bean.
-        // Before I implement this I want to check potential performance issues.
+        // ПРИМЕЧАНИЕ: Мы не выполняем метод чтения для каждого компонента.
+        // Перед реализацией этого я хочу проверить потенциальные проблемы с производительностью.
         return  $bean->{ 'shared' . ucfirst($property['name']) . 'List' };
     }
 
     /**
-     * The options method returns all the optional values this property can have,
-     * but NOT the ones it currently has.
+     * Метод options возвращает все необязательные значения, которые может иметь это свойство,
+     * но НЕ те, которые оно имеет в данный момент.
      *
-     * @param bean $bean The Readbean bean object with this property.
-     * @param array $property Plyn model property arrray.
+     * @param bean $bean Объект bean Readbean для этого свойства.
+     * @param array $property Массив свойств модели Plyn.
      *
-     * @return bean[] Array with all beans of the $property['name'] Plyn model.
+     * @return bean[] Массив со всеми компонентами модели Plyn $property['name'].
      */
     public function options($bean, $property)
     {
         if ($bean) {
-            // List of beans who allready have a many-to-many ralation with this bean
+            // Список сущностей, которые уже имеют связь «многие ко многим» с этой сущностью
             $relations = $bean->{ 'shared' . ucfirst($property['name']) . 'List' };
             if ($relations) {
                 $relations_ids = [];

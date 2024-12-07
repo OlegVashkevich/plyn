@@ -5,34 +5,35 @@ namespace Plyn\Property;
 use Sirius\Validation\Validator;
 
 /**
- * Controller for the Plyn string property.
- * Uses the Siriusphp validation library to validate strings.
+ * Контроллер для свойства строки Plyn.
+ * Использует библиотеку проверки Siriusphp для проверки строк.
  *
- * A property type controller can contain a set, read, delete and options method. All methods are optional.
+ * Контроллер типа свойства может содержать методы set, read, delete и options. Все методы являются необязательными.
  */
 
 class Str
 {
     /**
-     * The set method is executed each time a property with this type is set.
+     * Метод set выполняется каждый раз, когда устанавливается свойство с этим типом.
      *
-     * @param bean $bean The Redbean bean object with the property.
-     * @param array $property Plyn model property arrray.
-     * @param string $new_value The input string of this property.
+     * @param bean $bean Объект bean Readbean для этого свойства.
+     * @param array $property Массив свойств модели Plyn.
+     * @param string $new_value Входная строка этого свойства.
      *
-     * @return string The validated string.
+     * @return string Проверенная строка.
      */
     public function set($bean, $property, $new_value)
     {
         if (isset($property['validate'])) {
             $validator = new Validator();
-            $validator->add([ $property['name'] => $property['validate'] ]); // Validator rule(s) need to be an array
-
-            if ($validator->validate([ $property['name'] => $new_value ])) { // Validator needs an array as input
+            // Правило(а) валидатора должны быть массивом
+            $validator->add([ $property['name'] => $property['validate'] ]);
+            // Валидатору нужен массив в качестве входных данных
+            if ($validator->validate([ $property['name'] => $new_value ])) {
                 return $new_value;
             } else {
                 $messages = $validator->getMessages();
-                throw new \Exception('Vaildation error. ' . implode(', ', $messages[ $property['name'] ]));
+                throw new \Exception('Ошибка проверки. ' . implode(', ', $messages[ $property['name'] ]));
             }
         } else {
             return $new_value;

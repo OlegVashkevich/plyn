@@ -5,22 +5,22 @@ namespace Plyn\Core;
 use RedBeanPHP\R as R;
 
 /**
- * Plyn base model for all Plyn models.
- * Each type of content has it's own model that extends this model.
- * Each model has a type, description and properties.
- * The validation rules are optional.
+ * Базовая модель Plyn для всех моделей Plyn.
+ * Каждый тип контента имеет свою собственную модель, которая расширяет эту модель.
+ * Каждая модель имеет тип, описание и свойства.
+ * Правила проверки являются необязательными.
  *
  */
 
 class Model
 {
-    /** @var string $type The type of the model. It is the same as the modelname in lowercase, and defines the name of the RedBean beans and the name of the table in the database. */
+    /** @var string $type Тип модели. Он такой же, как modelname в нижнем регистре, и определяет имя сущности RedBean и имя таблицы в базе данных. */
     protected $type;
 
-    /** @var string $description The description of the model displayed in the admin interface. */
+    /** @var string $description Описание модели, отображаемое в интерфейсе администратора. */
     public $description;
 
-    /** @var array $properties An array defining the different content data-fields of the model. Each property is an array with at least the following keys: name, description, type, input. There can be other optional keys. */
+    /** @var array $properties Массив, определяющий различные поля данных содержимого модели. Каждое свойство представляет собой массив как минимум со следующими ключами: name, description, type, input. Могут быть и другие необязательные ключи. */
     public $properties;
 
     public $module;
@@ -32,7 +32,7 @@ class Model
     }
 
     /**
-     * Dispenses a Redbean bean ans sets it's creation date.
+     * Выдает сущность Redbean и устанавливает дату ее создания.
      *
      * @return bean
      */
@@ -47,26 +47,26 @@ class Model
 
 
     /**
-     * Set values for a bean. Used by Create and Update.
-     * Checks for each property if a "set" method exists for it's type.
-     * If so, it executes it.
+     * Задает значения для сущности. Используется Create и Update.
+     * Проверяет для каждого свойства, существует ли метод "set" для его типа.
+     * Если да, он выполняет его.
      *
-     * @param array $data The raw data, usually from the Slim $request->getParsedBody()
+     * @param array $data Необработанные данные, обычно из Slim $request->getParsedBody()
      * @param bean $bean
      *
-     * @return bean Bean with values based on $data.
+     * @return bean Сущность со значениями на основе $data.
      */
     public function set($data, $bean)
     {
 
-        // Add all properties to bean
+        // Добавляем все свойства к сущности
         foreach ($this->properties as $property) {
-            $value = false; // We need to clear possible previous $value
+            $value = false; // Нам нужно очистить возможное предыдущее значение $value
 
-            // Define property controller
+            // Определяем контроллер свойств
             $c = new $property['type']();
 
-            // New input for the property
+            // Новый данные для свойства
             if (
                 isset($data[ $property['name'] ])
                 ||
@@ -74,7 +74,7 @@ class Model
                 ||
                 $property['autovalue'] == true
             ) {
-                // Check if specific set property type method exists
+                // Проверяем, существует ли метод set для типа заданного свойства
                 if (method_exists($c, 'set')) {
                     //добавлем название модуля
                     $property['module'] = $this->module;
@@ -89,9 +89,9 @@ class Model
                     $hasvalue = false;
                 }
 
-            // No new input for the property
+            // Нет новых данных для свойств
             } else {
-                // Check if property already has value for required validation
+                // Проверяем, существует ли метод read для типа заданного свойства
                 if (isset($property['required'])) {
                     if (method_exists($c, 'read') && $c->read($bean, $property)) {
                         $hasvalue = true;
@@ -103,21 +103,22 @@ class Model
                 }
             }
 
-            // Check if property is required
+            // Проверяем обязательно ли свойство
             if (isset($property['required'])) {
                 if ($property['required'] && !$hasvalue) {
-                    throw new \Exception('Validation error. ' . $property['description'] . ' is required.');
+                    throw new \Exception('Ошибка проверки. ' . $property['description'] . ' обязательно.');
                 }
             }
 
-            // Results from methods that return boolean values are not stored.
-            // Many-to-many relations for example are stored in a seperate table.
+            // Результаты методов, возвращающих логические значения, не сохраняются.
+            // Например, отношения «многие ко многим» хранятся в отдельной таблице.
             if (!is_bool($value)) {
-                // Check if property value is unique
+                // Проверяем является ли значение свойства уникальным
                 if (isset($property['unique'])) {
                     $duplicate = R::findOne($this->type, $property['name'] . ' = :val ', [ ':val' => $value ]);
                     if ($duplicate && $duplicate->id != $bean->id) {
-                        throw new \Exception('Validation error. ' . $property['description'] . ' should be unique.');
+                        throw new \Exception('Ошибка проверки. '
+                            . $property['description'] . ' должно быть уникально.');
                     }
                 }
                 $bean->{ $property['name'] } = $value;
@@ -132,14 +133,14 @@ class Model
 
 
     // CRUD:
-    // Create, Read, Update and Delete methods
+    // Методы Create, Read, Update и Delete
 
     /**
      * Create
      *
-     * @param array $data The raw data to create the Redbeean bean.
+     * @param array $data Необработанные данные для создания сущности Redbeean.
      *
-     * @return bean New bean with values based on $data.
+     * @return bean Новая запись со значениями на основе $data.
      */
     public function create($data)
     {
@@ -147,11 +148,11 @@ class Model
         // Create
         $bean = $this->universalCreate();
 
-        // Catch exception, because bean might already have been created by property method.
+        // Перехватываем исключение, поскольку компонент мог быть уже создан методом свойства.
         try {
             return $this->set($data, $bean);
         } catch (\Exception $e) {
-            // Delete bean
+            // Удаляем запись
             $this->delete($bean->id);
             throw new \Exception($e->getMessage());
         }
@@ -160,28 +161,28 @@ class Model
     /**
      * Read
      *
-     * Search bean by an unique property, like an id or a slug.
-     * If $value is not set, it returns all beans of it's type.
+     * Поиск bean-компонента по уникальному свойству, например, идентификатору или символьному коду.
+     * Если $value не задано, он возвращает все bean-компоненты этого типа.
      *
-     * @param mixed $value The value of the property
-     * @param string $property The name of the property, defaults to id
+     * @param mixed $value Значение свойства
+     * @param string $property Имя свойства, по умолчанию id
      *
-     * @return mixed Can return single bean or array of beans if $value is not set.
+     * @return mixed Может возвращать один bean-компонент или массив bean-компонентов, если $value не задано.
      */
     public function read($value = false, $property_name = 'id')
     {
         if ($value) {
-            // Single bean
+            // Один bean-компонент
             $bean = R::findOne($this->type, $property_name . ' = :value ', [ ':value' => $value ]);
             if (!$bean) {
-                throw new \Exception('This ' . $this->type . ' does not exist.');
+                throw new \Exception('Модель ' . $this->type . ' не существует.');
             }
 
-            // Check for property type specific read methods
+            // Проверяем методы чтения, специфичные для типа свойства
             foreach ($this->properties as $property) {
                 //добавлем название модуля
                 $property['module'] = $this->module;
-                // Check if specific read property method exists
+                // Проверяем, существует ли определенный метод чтения свойства
                 $c = new $property['type']();
                 if (method_exists($c, 'read')) {
                     $bean->{ $property['name'] } = $c->read($bean, $property);
@@ -189,10 +190,10 @@ class Model
             }
             return $bean;
         } else {
-            // All beans of this type
-            // Oder by position(s) if exits
-            // NOTE: We're not executing the read method for each bean.
-            // Before I implement this I want to check potential performance issues.
+            // Все bean-компоненты этого типа
+            // Упорядоченные по позиции(ям), если выходы
+            // NOTE: Мы не выполняем метод чтения для каждого бина.
+            // Перед тем, как реализовать это, я хочу проверить потенциальные проблемы с производительностью.
             $add_to_query = '';
             foreach ($this->properties as $property) {
                 if ($property['type'] === '\\Plyn\\Property\\Position') {
@@ -206,18 +207,18 @@ class Model
     /**
      * Update
      *
-     * Update the data of the bean.
+     * Обновляет данные bean-компонента.
      *
-     * @param array $data The raw data to create the Redbeean bean.
+     * @param array $data Необработанные данные для создания bean-компонента Redbeean.
      * @param integer $id
      *
-     * @return bean Bean with updated values based on $data.
+     * @return bean Компонент с обновленными значениями на основе $data.
      */
     public function update($data, $id)
     {
         $bean = R::findOne($this->type, ' id = :id ', [ ':id' => $id ]);
         if (!$bean) {
-            throw new \Exception('This ' . $this->type . ' does not exist.');
+            throw new \Exception('Модель ' . $this->type . ' не существует.');
         }
         return $this->set($data, $bean);
     }
@@ -225,7 +226,7 @@ class Model
     /**
      * Delete
      *
-     * Delete the bean.
+     * Удаление bean-компонента
      *
      * @param integer $id
      */
@@ -233,12 +234,11 @@ class Model
     {
         $bean = R::findOne($this->type, ' id = :id ', [ ':id' => $id ]);
         if (!$bean) {
-            throw new \Exception('This ' . $this->type . ' does not exist.');
+            throw new \Exception('Модель ' . $this->type . ' не существует.');
         }
 
-        // Check for property type specific delete methods
+        // Проверяем методы удаления, специфичные для типа свойства
         foreach ($this->properties as $property) {
-            // Check if specific delete property method exists
             $c = new $property['type']();
             if (method_exists($c, 'delete')) {
                 $c->delete($bean, $property);
@@ -249,31 +249,31 @@ class Model
 
 
 
-    // HELPER METHODS
+    // МЕТОДЫ ПОМОШНИКИ
 
     /**
-     * Populate properties
+     * Заполнение свойств
      *
-     * Properties can have optional values, for example relation and file_select.
-     * This method, if appropriate, queries properties for optional values, and populates them with them.
-     * Searches bean by an unique property, like an id or a slug.
-     * If $value is not set, no bean is supplied to the property options method.
+     * Свойства могут иметь необязательные значения, например relation и file_select.
+     * Этот метод, если применимо, запрашивает свойства для необязательных значений и заполняет их ими.
+     * Выполняет поиск bean-компонента по уникальному свойству, например id или slug.
+     * Если $value не задано, bean-компонент не предоставляется методу параметров свойства.
      *
-     * @param mixed $value The value of the property
-     * @param string $property The name of the property, defaults to id
+     * @param mixed $value Значение свойства
+     * @param string $property Имя свойства, по умолчанию id
      */
     public function populateProperties($value = false, $property_name = 'id')
     {
         if ($value) {
             $bean = R::findOne($this->type, $property_name . ' = :value ', [ ':value' => $value ]);
             if (!$bean) {
-                throw new \Exception('This ' . $this->type . ' does not exist.');
+                throw new \Exception('Модель ' . $this->type . ' не существует.');
             }
         } else {
             $bean = false;
         }
         foreach ($this->properties as $key => $property) {
-            // Check for options method in property type controller
+            // Проверяем метод options в контроллере типа свойства
             $c = new $property['type']();
             if (method_exists($c, 'options')) {
                 $this->properties[$key]['options'] = $c->options($bean, $property);

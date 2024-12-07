@@ -5,7 +5,7 @@ namespace Plyn\Models\Example;
 use Plyn\Core\Model;
 
 /**
- * Example Plyn content model
+ * Пример модели контента Plyn
  */
 
 class Book extends Model
@@ -16,11 +16,11 @@ class Book extends Model
 
         $this->type = 'book';
 
-        // Description in admin interface
+        // Описание в интерфейсе администратора
         $this->description = 'Книга — это один из видов печатной продукции.';
 
         $this->properties = [
-            // Allways have a title
+            // title обязателен
             [
                 'name' => 'title',
                 'description' => 'Название',
@@ -41,8 +41,8 @@ class Book extends Model
                 'description' => 'Изображение',
                 'required' => true,
                 'type' => '\Plyn\Property\Fileselect',
-                'extensions' => 'jpeg,jpg,gif,png', // Allowed extensions
-                'directory' => '/files', // Directory relative to PATH (no trailing slash)
+                'extensions' => 'jpeg,jpg,gif,png', // Разрешенные расширения
+                'directory' => '/files', // Каталог относительно PATH (без завершающего слеша)
                 'input' => 'fileselect'
             ],
             [

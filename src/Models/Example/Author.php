@@ -5,7 +5,7 @@ namespace Plyn\Models\Example;
 use Plyn\Core\Model;
 
 /**
- * Example Plyn content model
+ * Пример модели контента Plyn
  */
 
 class Author extends Model
@@ -16,11 +16,11 @@ class Author extends Model
 
         $this->type = 'author';
 
-        // Description in admin interface
+        // Описание в интерфейсе администратора
         $this->description = 'Авторы книг.';
 
         $this->properties = [
-            // Allways have a title
+            // title обязателен
             [
                 'name' => 'title',
                 'description' => 'Имя',
@@ -50,7 +50,7 @@ class Author extends Model
                 'description' => 'Изображение',
                 'required' => true,
                 'type' => '\Plyn\Property\Upload',
-                'directory' => '/uploads', // Directory relative to PATH (no trailing slash)
+                'directory' => '/uploads', // Каталог относительно PATH (без завершающего слеша)
                 'input' => 'upload',
                 'validate' => [ ['extension', 'allowed=jpeg,jpg,gif,png'], ['size', 'size=1M'] ]
             ],

@@ -5,7 +5,7 @@ namespace Plyn\Models\Example;
 use Plyn\Core\Model;
 
 /**
- * Example Plyn content model
+ * Пример модели контента Plyn
  */
 
 class Genre extends Model
@@ -16,11 +16,11 @@ class Genre extends Model
 
         $this->type = 'genre';
 
-        // Description in admin interface
+        // Описание в интерфейсе администратора
         $this->description = 'Жанры книг.';
 
         $this->properties = [
-            // Allways have a title
+            // title обязателен
             [
                 'name' => 'title',
                 'description' => 'Название',

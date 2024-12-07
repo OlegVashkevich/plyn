@@ -5,24 +5,25 @@ namespace Plyn\Core;
 use RedBeanPHP\R as R;
 
 /**
- * Search controller for Plyn.
+ * Контроллер поиска для Plyn.
  *
- * We use "*" as the seperator, since "-" is in the slug, and "+" is filtered out of the $_GET variable name by PHP.
+ * Мы используем "*" в качестве разделителя, так как "-" используется для символьного кода,
+ * а "+" отфильтровывается из имени переменной $_GET PHP.
  *
- * Syntax:
- * Value from: *min
- * Value to: *max
- * Contains: *has
- * Equal to: *is
- * Sort: sort
- * Limit: limit
- * Offset: offset
+ * Синтаксис:
+ * Значение от: *min
+ * Значение до: *max
+ * Содержит: *has
+ * Равно: *is
+ * Сортировка: sort
+ * Предел: limit
+ * Смещение: offset
  *
- * offset only works if limit is defined too
+ * смещение работает только если предел также определен
  *
- * Query structure examples:
- * [model]?*has=[search string] : Searches all searchable properties of a model
- * [model]?[property]*has=[search string] : Searches single property of a model
+ * Примеры структур запросов:
+ * [model]?*has=[search string] : Поиск всех доступных для поиска свойств модели
+ * [model]?[property]*has=[search string] : Поиск одного свойства модели
  * [model]?[property]*min=[number]
  * sort=[property]*asc
  * [model]?description*title*has=[search string]&title*has=[search string]&sort=title*asc&offset=10&limit=100
@@ -36,9 +37,10 @@ class Search
     protected $model;
 
     /**
-     * Construct function
+     * Конструктор
      *
-     * @param string $type The Bean type to search
+     * @param string $module Название модуля
+     * @param string $type Тип сущности для поиска
      */
     public function __construct($module, $type)
     {
@@ -51,7 +53,7 @@ class Search
             '*is'
         );
 
-        // Sorting order
+        // Порядок сортировки
         $this->sequences = array(
             '*asc',
             '*desc'
@@ -62,80 +64,81 @@ class Search
     }
 
     /**
-     * Search function
+     * Функция поиска
      *
-     * @param array[] $params Request parameters array
+     * @param array[] $params Массив параметров запроса
      *
-     * @return array[] Array with ['reslut'] of Redbean beans matching the search criteria,
-     * ['total'] beans for the query, total ['pages'],
-     * current ['page'], ['offset'], ['limit'], ['query'] url part and ['section'] url part.
+     * @return array[] Массив с ['result'] сущностями Redbean, соответствующими критериям поиска,
+     * ['total'] сущностей для запроса, всего ['pages'],
+     * текущая ['page'], ['offset'], ['limit'], ['query'] часть URL и ['section'] часть URL.
      */
     public function find($params)
     {
-        // Search
-        $loop = 0; // To create different name for all search values
+        // Поиск
+        $loop = 0; // Чтобы создать разные имена для всех значений поиска
         $q = [];
         $s = [];
         $values = [];
         foreach ($params as $left => $right) {
             $lhs = $this->lefthandside($left);
-            // Sort
+            // Сортировка
             if ($lhs == 'sort') {
                 $rhs = $this->righthandside($right);
 
                 $glue = ' ' . strtoupper($rhs['order']) . ', ';
-                $s[] = implode($glue, $rhs['properties']) . ' ' . strtoupper($rhs['order']); // Add latest order
+                // Добавляем последний порядок
+                $s[] = implode($glue, $rhs['properties']) . ' ' . strtoupper($rhs['order']);
             } elseif ($lhs === 'offset') {
-                // Limit
+                // Смещение
                 $offset = floatval($right);
                 $values[ ':offset' ] = floatval($right);
             } elseif ($lhs === 'limit') {
-                // Limit
+                // Лимит
                 $limit = floatval($right);
                 $values[ ':limit' ] = floatval($right);
 
-            // Find
+            // Ищем
             } elseif ($lhs) {
                 $p = [];
                 foreach ($lhs['properties'] as $k => $v) {
                     if ($this->isSearchable($v)) {
                         if ($lhs['criterion'] === '*min') {
-                            // Create '>=' query
+                            // Создаем запрос '>='
                             $p[] = ' ' . $v . ' >= :value' . $loop . ' ';
-                            // Add value to Redbean named search values array
+                            // Добавляем значение в массив значений именованного поиска Redbean
                             $values[ ':value' . $loop ] = floatval($right);
                         } elseif ($lhs['criterion'] === '*max') {
-                            // Create '<=' query
+                            // Создаем запрос '<='
                             $p[] = ' ' . $v . ' <= :value' . $loop . ' ';
-                            // Add value to Redbean named search values array
+                            // Добавляем значение в массив значений именованного поиска Redbean
                             $values[ ':value' . $loop ] = floatval($right);
                         } elseif ($lhs['criterion'] === '*has') {
-                            // Create 'LIKE' query
+                            // Создаем запрос 'LIKE'
                             $p[] = ' ' . $v . ' LIKE :value' . $loop . ' ';
-                            // Add value to Redbean named search values array
+                            // Добавляем значение в массив значений именованного поиска Redbean
                             $values[ ':value' . $loop ] = '%' . $right . '%';
                         } elseif ($lhs['criterion'] === '*is') {
-                            // Create '=' query
+                            // Создаем запрос '='
                             $p[] = ' ' . $v . ' = :value' . $loop . ' ';
-                            // Add value to Redbean named search values array
+                            // Добавляем значение в массив значений именованного поиска Redbean
                             $values[ ':value' . $loop ] = $right;
                         }
                     } else {
-                        throw new \Exception($v . ' is not searchable.');
-                    } // End isSearchable($v)
-                } // End foreach $lhs['properties']
+                        throw new \Exception($v . ' недоступно для поиска.');
+                    } // Конец isSearchable($v)
+                } // Конец foreach $lhs['properties']
 
 
-                // Implode array to create nice 'OR' query
+                // Разбиваем массив, чтобы создать хороший запрос «ИЛИ»
                 $q[] = implode('OR', $p);
 
                 $loop++;
-            } // End if else
-        } // End foreach $params
+            } // Конец if else
+        } // Конец foreach $params
 
-        // Query
+        // Запрос
 
-        // Implode array to create nice '( #query ) AND ( #query )'
+        // Разбиваем массив, чтобы создать хороший '( #query ) AND ( #query )'
         $query = '';
         if (count($q) > 1) {
             $query = '(' . implode(') AND (', $q) . ')';
@@ -143,7 +146,7 @@ class Search
             $query = $q[0];
         }
 
-        // Implode different sort arrays
+        // Разбиваем различные сортировочные массивы
         $sort = '';
         if (count($s) > 0) {
             $sort = ' ORDER BY ' . implode(', ', $s);
@@ -159,27 +162,27 @@ class Search
             unset($values[ ':limit' ]);
             unset($values[ ':offset' ]);
         }
-        // Search result
+        // Результат поиска
         $return['result'] = R::find($this->type, $query . $sort . $part, $values);
 
-        // Total number of results for this query
+        // Общее количество результатов по этому запросу
         unset($values[ ':limit' ]);
         unset($values[ ':offset' ]);
         $return['total'] = R::count($this->type, $query . $sort, $values);
 
-        // Pages
+        // Страницы
         if (isset($limit)) {
             $return['limit'] = $limit;
-            // Total pages
+            // Всего страниц
             $return['pages'] = ceil($return['total'] / $limit);
             if (isset($offset)) {
                 $return['offset'] = $offset;
-                // Current page
+                // Текущая страница
                 $return['page'] = ceil($offset / $limit);
             }
         }
 
-        // Seperate search request from section request
+        // Отделяем поисковый запрос от запроса раздела
         foreach ($params as $left => $right) {
             if ($left == 'limit' || $left == 'offset') {
                 if (!isset($section)) {
@@ -205,12 +208,12 @@ class Search
     }
 
     /*
-        * Check if property exists and is searchable
-        *
-        * @param string $propertyname
-        *
-        * @return boolean
-        */
+    * Проверяет, существует ли свойство и доступно ли для поиска
+    *
+    * @param string $propertyname
+    *
+    * @return boolean
+    */
     private function isSearchable($propertyname)
     {
         foreach ($this->model->properties as $property) {
@@ -225,15 +228,15 @@ class Search
     }
 
     /*
-        * Analyse the left hand side of the search equation
-        *
-        * @param string $input
-        *
-        * @return string[] Array containing criterion and nested array with properties to search
-        */
+    * Анализируем левую часть уравнения поиска
+    *
+    * @param string $input
+    *
+    * @return string[] Массив, содержащий критерий и вложенный массив со свойствами для поиска
+    */
     private function lefthandside($input)
     {
-        if ($input == 'sort') { // Sorting happens after searching
+        if ($input == 'sort') { // Сортировка происходит после поиска
             return 'sort';
         } elseif ($input == 'offset') {
             return 'offset';
@@ -244,10 +247,10 @@ class Search
                 if (substr($input, strlen($criterion) * -1) == $criterion) {
                     $return = [ 'criterion' => $criterion ];
                     if (strlen($input) > strlen($criterion)) {
-                        // Array of properties
+                        // Массив свойств
                         $return['properties'] = explode('*', substr($input, 0, strlen($criterion) * -1));
                     } else {
-                        // If no properties are defined, return all searchable properties
+                        // Если свойства не определены, вернуть все доступные для поиска свойства.
                         foreach ($this->model->properties as $property) {
                             if (isset($property['searchable'])) {
                                 $return['properties'][] = $property['name'];
@@ -255,7 +258,7 @@ class Search
                         }
 
                         if (count($return['properties']) == 0) {
-                            throw new \Exception('This model has no searchable properties.');
+                            throw new \Exception('У этой модели нет доступных для поиска свойств.');
                         }
                     }
                     return $return;
@@ -266,19 +269,19 @@ class Search
     }
 
     /*
-        * Analyse the right hand side of the search equation
-        *
-        * @param string $input
-        *
-        * @return string[] Array containing order and nested array with properties to sort by
-        */
+    * Анализируем правую часть уравнения поиска
+    *
+    * @param string $input
+    *
+    * @return string[] Массив, содержащий порядок и вложенный массив со свойствами для сортировки
+    */
     private function righthandside($input)
     {
         foreach ($this->sequences as $order) {
             if (substr($input, strlen($order) * -1) == $order) {
                 $return = [ 'order' => substr($order, 1) ];
                 if (strlen($input) > strlen($order)) {
-                    $return['properties'] = explode('*', substr($input, 0, strlen($order) * -1)); // Array of properties
+                    $return['properties'] = explode('*', substr($input, 0, strlen($order) * -1)); // Массив свойств
                 } else {
                     return false;
                 }

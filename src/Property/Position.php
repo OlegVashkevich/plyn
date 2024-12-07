@@ -5,48 +5,48 @@ namespace Plyn\Property;
 use RedBeanPHP\R as R;
 
 /**
- * Controller for the Plyn position property.
- * Makes room for the newly positioned Redbean bean by updating the positions of other beans,
- * and returns the new position of the bean.
+ * Контроллер для свойства положения Plyn.
+ * Создает место для вновь размещенного компонента Redbean, обновляя позиции других компонентов,
+ * и возвращает новую позицию компонента.
  *
- * A property type controller can contain a set, read, delete and options method. All methods are optional.
+ * Контроллер типа свойства может содержать методы set, read, delete и options. Все методы являются необязательными.
  */
 
 class Position
 {
     /**
-     * The set method is executed each time a property with this type is set.
+     * Метод set выполняется каждый раз, когда задается свойство с этим типом.
      *
-     * @param bean $bean The Redbean bean object with the property.
-     * @param array $property Plyn model property arrray.
-     * @param integer $new_value The input position of the object with this property.
+     * @param bean $bean Объект bean Readbean для этого свойства.
+     * @param array $property Массив свойств модели Plyn.
+     * @param integer $new_value Входная позиция объекта с этим свойством.
      *
-     * @return integer The new position of the object with this property.
+     * @return integer Новая позиция объекта с этим свойством.
      */
     public function set($bean, $property, $new_value)
     {
         if (!empty($new_value) || $new_value === 0 || $new_value === '0') {
-            $new_value = intval($new_value); // Convert to integer
+            $new_value = intval($new_value); // Преобразуем в целое число
         }
 
-        // Absolute position or relative to many-to-one relation?
+        // Абсолютное положение или относительное отношение многие к одному?
         if (isset($property['manytoone'])) {
-            // Relative
+            // Относительное
 
-            // Check if parent has changed
+            // Проверяем, изменился ли родитель
             $old_parent_id = $bean->{ $property['manytoone'] . '_id' };
             $new_parent_id = $bean->{ $property['manytoone'] }->id;
 
             $all = R::find($bean->getMeta('type'), $property['manytoone'] . '_id = ? ', [ $new_parent_id ]);
             $count_all = R::count($bean->getMeta('type'), $property['manytoone'] . '_id = ? ', [ $new_parent_id ]);
 
-            // Check if parent has changed
+            // Проверяем, изменился ли родитель
             if ($old_parent_id !== $new_parent_id) {
-                $count_all++; // Add 1 because bean has new parent
-                $all[] = $bean; // Add bean to result for new parent
-                $new_value = $count_all - 1; // Add bean to the bottom of new parent
+                $count_all++; // Добавляем 1, потому что у компонента появился новый родительский элемент
+                $all[] = $bean; // Добавляем bean в результат для нового родителя
+                $new_value = $count_all - 1; // Добавляем bean в конец нового родителя
 
-                // Parent has changed, update old parent positions
+                // Родитель изменился, обновляем старые родительские позиции
                 $old_siblings = R::find(
                     $bean->getMeta('type'),
                     $property['manytoone'] . '_id = :parent_id AND id != :bean_id ORDER BY :property ASC ',
@@ -61,20 +61,20 @@ class Position
                 }
             }
         } else {
-            // Absolute
+            // Абсолютное
             $all = R::findAll($bean->getMeta('type'));
             $count_all = R::count($bean->getMeta('type'));
         }
 
         $curr_value = $bean->{ $property['name'] };
 
-        // New bean
+        // Новый bean
         if (empty($curr_value) && $curr_value !== 0 && $curr_value !== '0') {
-            // Position at the bottom
+            // Позиция внизу
             $curr_value = $count_all;
         }
 
-        // No new input
+        // Нет новых данных
         if ((empty($new_value) && $new_value !== 0) || $new_value == $curr_value) {
             return $curr_value;
         } else {
@@ -106,14 +106,14 @@ class Position
     }
 
     /**
-     * The delete method is executed each time a an object with a property with this type is deleted.
+     * Метод удаления выполняется каждый раз при удалении объекта со свойством этого типа.
      *
-     * @param bean $bean The Redbean bean object with the property.
-     * @param array $property Plyn model property arrray.
+     * @param bean $bean Объект bean Readbean для этого свойства.
+     * @param array $property Массив свойств модели Plyn.
      */
     public function delete($bean, $property)
     {
-        // Absolute position or relative to many-to-one relation?
+        // Абсолютное положение или относительное отношение многие к одному?
         if (isset($property['manytoone'])) {
             $count_all = R::count(
                 $bean->getMeta('type'),
@@ -125,6 +125,6 @@ class Position
         }
 
         $bottom = $count_all - 1;
-        $this->set($bean, $property, $bottom); // No need to store new position of this bean
+        $this->set($bean, $property, $bottom); // Нет необходимости сохранять новую позицию этого компонента
     }
 }

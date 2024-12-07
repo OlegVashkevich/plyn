@@ -22,7 +22,7 @@
 <form class="form-horizontal" method="post" role="form" enctype="multipart/form-data"
 	action="{% if bean %}{{ url_for('putbean', { 'beantype': beantype, 'id': bean.id }) }}{% else %}{{ url_for('postbean', { 'beantype': beantype }) }}{% endif %}">
 	<input type="hidden" name="_METHOD" value="{{ method }}" />
-	<!-- CSRF Protection -->
+	<!-- CSRF -->
 	<input type="hidden" name="{{ csrf.keys.name }}" value="{{ csrf.name }}">
 	<input type="hidden" name="{{ csrf.keys.value }}" value="{{ csrf.value }}">
 	{% for property in beanproperties %}
@@ -43,7 +43,7 @@
 {% block javascript %}
 {{ parent() }}
 
-<!-- Delete button -->
+<!-- Delete -->
 <script type="text/javascript">
 	$('.delete').on('click', function (e) {
 		e.preventDefault();
@@ -55,7 +55,7 @@
 					action: $(this).attr('href')
 				})
 					.append('<input type="hidden" name="_METHOD" value="DELETE"/>')
-					// CSRF Protection
+					// CSRF
 					.append('<input type="hidden" name="{{ csrf.keys.name }}" value="{{ csrf.name }}">')
 					.append('<input type="hidden" name="{{ csrf.keys.value }}" value="{{ csrf.value }}">')
 			);

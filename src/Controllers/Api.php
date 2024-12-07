@@ -6,7 +6,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface as SRequestInterface;
 use Psr\Container\ContainerInterface;
 use RedBeanPHP\R as R;
-use Plyn\Core\RouteHelper;
+use Plyn\Core\EntityProvider;
 use Plyn\Core\Search;
 
 class Api
@@ -45,7 +45,7 @@ class Api
     public function readmain(SRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
     {
         $data = [
-            'beantypes' => RouteHelper::getBeantypes($this->container->get('settings')['path'] . '/src', 'Example')
+            'beantypes' => EntityProvider::getBeantypes($this->container->get('settings')['path'] . '/src', 'Example')
         ];
         return $this->setResponse($response, 200, false, $data);
     }
@@ -53,7 +53,7 @@ class Api
     public function readtype(SRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
     {
         try {
-            $c = RouteHelper::setupBeanModel($this->container
+            $c = EntityProvider::setupBeanModel($this->container
                 ->get('settings')['path'] . '/src', 'Example', $args['beantype']);
             if (isset($args['id'])) {
                 $c->populateProperties($args['id']);
@@ -78,14 +78,14 @@ class Api
 
     public function readone(SRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
     {
-        $c = RouteHelper::setupBeanModel($this->container
+        $c = EntityProvider::setupBeanModel($this->container
             ->get('settings')['path'] . '/src', 'Example', $args['beantype']);
         $c->populateProperties($args['id']);
 
         $data = [
             'beantype' => $args['beantype'],
             'beanproperties' => $c->properties,
-            'bean' => R::exportAll($c->read($args['id'])) // Use exportAll to show related beans
+            'bean' => R::exportAll($c->read($args['id'])) // Используем exportAll для отображения связанных компонентов
         ];
 
         return $this->setResponse($response, 200, false, $data);
@@ -94,14 +94,14 @@ class Api
     public function add(SRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
     {
         try {
-            $c = RouteHelper::setupBeanModel($this->container
+            $c = EntityProvider::setupBeanModel($this->container
                 ->get('settings')['path'] . '/src', 'Example', $args['beantype']);
             $input = $request->getParsedBody();
             $bean = $c->create($input);
             $data = [
                 'beantype' => $args['beantype'],
                 'beanproperties' => $c->properties,
-                'bean' => R::exportAll($bean) // Use exportAll to show related beans
+                'bean' => R::exportAll($bean) // Используем exportAll для отображения связанных компонентов
             ];
             return $this->setResponse($response, 200, $bean->title . ' added', $data);
         } catch (\Exception $e) {
@@ -113,14 +113,14 @@ class Api
     public function update(SRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
     {
         try {
-            $c = RouteHelper::setupBeanModel($this->container
+            $c = EntityProvider::setupBeanModel($this->container
                 ->get('settings')['path'] . '/src', 'Example', $args['beantype']);
             $input = $request->getParsedBody();
             $bean = $c->update($input, $args['id']);
             $data = [
                 'beantype' => $args['beantype'],
                 'beanproperties' => $c->properties,
-                'bean' => R::exportAll($bean) // Use exportAll to show related beans
+                'bean' => R::exportAll($bean) // Используем exportAll для отображения связанных компонентов
             ];
             return $this->setResponse($response, 200, $bean->title . ' updated', $data);
         } catch (\Exception $e) {
@@ -132,7 +132,7 @@ class Api
     public function delete(SRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
     {
         try {
-            $c = RouteHelper::setupBeanModel($this->container
+            $c = EntityProvider::setupBeanModel($this->container
                 ->get('settings')['path'] . '/src', 'Example', $args['beantype']);
             $c->delete($args['id']);
             return $this->setResponse($response, 200, $args['beantype'] . ' deleted', []);
