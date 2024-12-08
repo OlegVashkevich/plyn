@@ -1,0 +1,54 @@
+{% set title = 'Результат поиска для "' ~ query ~ '"' %}
+
+{% extends "public/layout.html" %}
+
+{% block content %}
+
+<div class="page-header">
+	<h1>Результат поиска для "{{ query }}"</h1>
+</div>
+
+<form class="form-inline" method="get" action="/book/search">
+	<div class="form-group">
+		<input type="text" class="form-control" name="*has" placeholder="Поиск">
+		<input type="hidden" name="sort" value="title*asc">
+	</div>
+	<button type="submit" class="btn btn-primary">Искать</button>
+</form>
+
+<hr>
+
+{% if search.result|length > 0 %}
+{% for book in search.result %}
+<div class="media">
+	<div class="media-left">
+		<a href="{{ url_for('book', { 'slug': book.slug }) }}">
+			<img class="media-object" src="{{ book.picture }}" alt="{{ book.title }}" width="64">
+		</a>
+	</div>
+	<div class="media-body">
+		<a href="{{ url_for('book', { 'slug': book.slug }) }}">
+			<h4 class="media-heading">{{ book.title }}</h4>
+		</a>
+		{{ book.description }}
+	</div>
+</div>
+{% endfor %}
+{% else %}
+<hr>
+<p class="text-muted text-center">Извините, ваш запрос не соответствует ни одному результату...</p>
+{% endif %}
+
+{% if search.pages and search.pages > 1 %}
+<ul class="pagination">
+	{% for page in 1..search.pages %}
+	<li {% if search.page==page-1 %}class="active" {% endif %}>
+		<a
+			href="{{ get_uri }}{% if search.query %}?{{ search.query }}&{% else %}?{% endif %}limit={{ search.limit }}&offset={{ (page - 1) * search.limit }}">{{
+			page }}</a>
+	</li>
+	{% endfor %}
+</ul>
+{% endif %}
+
+{% endblock content %}

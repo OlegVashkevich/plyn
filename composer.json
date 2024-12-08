@@ -1,0 +1,38 @@
+{
+	"name": "olegvashkevich/plyn",
+	"type": "project",
+	"description": "Плынь позволяет создавать гибкие объекты контента с помощью простого класса и управлять ими с помощью веб-интерфейса.",
+	"keywords": ["cms","content", "backend","slim","redbean","twig","validation"],
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "Oleg Vashkevich",
+			"email": "info@vashkevich.site",
+			"homepage": "https://vashkevich.site",
+			"role": "Developer"
+		}
+	],
+	"require": {
+		"php": ">=8.2.0",
+		"gabordemooij/redbean": "^5.7",
+		"slim/slim": "^4.0",
+		"php-di/php-di": "^7.0",
+		"nyholm/psr7": "^1.8",
+		"nyholm/psr7-server": "^1.1",
+		"slim/twig-view": "^3.4",
+		"slim/csrf": "^1.4",
+		"slim/flash": "^0.4.0",
+		"siriusphp/validation": "^3.1",
+		"siriusphp/upload": "^3.0",
+		"hashids/hashids": "^5.0",
+		"tuupola/slim-basic-auth": "^3.3",
+		"ext-zip": "*",
+		"ext-pdo_sqlite": "*"
+	},
+    "autoload": {
+		"psr-4": { "Plyn\\": "src/" }
+    },
+	"scripts": {
+	  "start": "php -S localhost:8080 -t public/"
+	}
+}

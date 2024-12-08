@@ -1,0 +1,23 @@
+<div class="form-group{% if property.required %} required{% endif %}">
+	<label for="{{ property.name }}" class="col-sm-2 control-label">{{ property.description }}</label>
+	<div class="col-sm-10">
+		{% if bean %}
+		{% for bean in bean[property.name] %}
+		<div class="checkbox">
+			<label>
+				<input type="checkbox" name="{{ property.name }}[]" value="{{ bean.id }}" checked="checked"> <a
+					href="{{ url_for('getbean', { 'beantype': property.name, 'id': bean.id }) }}">{{ bean.title }}</a>
+			</label>
+		</div>
+		{% endfor %}
+		{% endif %}
+		{% if property.options and property.options|length > 0 %}
+		<select class="form-control select2" name="{{ property.name }}[]">
+			<option value="" selected="selected">Выберите, чтобы добавить {{ property.name }}</option>
+			{% for option in property.options %}
+			<option value="{{ option.id }}">{{ option.title }}</option>
+			{% endfor %}
+		</select>
+		{% endif %}
+	</div>
+</div>

@@ -1,0 +1,71 @@
+{% set title = 'Home' %}
+
+{% extends "admin/layout.html" %}
+
+{% block content %}
+
+<h1 class="page-header">Все сущности</h1>
+
+{% for beantype in dashboard %}
+
+{% if (loop.index - 1) is divisible by(3) %}
+<div class="row">
+	{% endif %}
+
+	<div class="col-md-4">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h2 class="panel-title">
+					<a href="{{ url_for('listbeans', { 'beantype': beantype.name }) }}?limit=50">{{ beantype.name }}</a>
+				</h2>
+			</div>
+
+			<div class="panel-body">{{ beantype.description }}</div>
+
+			<ul class="list-group">
+				<li class="list-group-item small">
+					Всего записей: <b>{{ beantype.total }}</b>
+				</li>
+				{% if beantype.modified %}
+				<li class="list-group-item small">
+					Последнее изменение: <b><a
+							href="{{ url_for('getbean', { 'beantype': beantype.name, 'id': beantype.modified.id }) }}">{{
+							beantype.modified.title }}</a></b> в <b>{{ beantype.modified.modified }}</b>
+				</li>
+				{% endif %}
+				{% if beantype.created %}
+				<li class="list-group-item small">
+					Новейшая запись: <b><a
+							href="{{ url_for('getbean', { 'beantype': beantype.name, 'id': beantype.created.id }) }}">{{
+							beantype.created.title }}</a></b> в <b>{{ beantype.created.created }}</b>
+				</li>
+				{% endif %}
+			</ul>
+
+			<div class="panel-footer">
+				<div class="row">
+					<div class="col-sm-6">
+						<a href="{{ url_for('listbeans', { 'beantype': beantype.name }) }}?limit=50"
+							class="btn btn-default btn-block btn-sm">Показать все</a>
+					</div>
+					<div class="col-sm-6">
+						<a href="{{ url_for('addbean', { 'beantype': beantype.name }) }}"
+							class="btn btn-primary btn-block btn-sm">Добавить</a>
+					</div>
+				</div>
+			</div>
+
+		</div>
+	</div>
+
+	{% if loop.index is divisible by(3) or loop.index == dashboard|length %}
+</div>
+{% endif %}
+
+{% endfor %}
+
+<hr>
+<p class="text-center"><a href="#" target="_blank">Сделано с помощью <b>Плыни</b>: динамическая админка на основе
+		моделей</a></p>
+
+{% endblock content %}

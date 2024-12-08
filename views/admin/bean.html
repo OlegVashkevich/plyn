@@ -1,0 +1,66 @@
+{% if bean %}
+{% set title = bean.title %}
+{% else %}
+{% set title = 'Добавить ' ~ beantype %}
+{% endif %}
+
+{% extends "admin/layout.html" %}
+
+{% block content %}
+
+<h1 class="page-header">{% if bean %}{{ bean.title }} <small>({{ beantype }})</small>{% else %}Добавить {{ beantype }}{%
+	endif %}</h1>
+
+{% if bean %}
+<div class="row">
+	<div class="col-sm-offset-2 col-sm-10">
+		<p class="small"><i>Создан {{ bean.created }}, изменен {{ bean.modified }}.</i></p>
+	</div>
+</div>
+{% endif %}
+
+<form class="form-horizontal" method="post" role="form" enctype="multipart/form-data"
+	action="{% if bean %}{{ url_for('putbean', { 'beantype': beantype, 'id': bean.id }) }}{% else %}{{ url_for('postbean', { 'beantype': beantype }) }}{% endif %}">
+	<input type="hidden" name="_METHOD" value="{{ method }}" />
+	<!-- CSRF -->
+	<input type="hidden" name="{{ csrf.keys.name }}" value="{{ csrf.name }}">
+	<input type="hidden" name="{{ csrf.keys.value }}" value="{{ csrf.value }}">
+	{% for property in beanproperties %}
+	{% include 'property/' ~ property.input ~ '.html' %}
+	{% endfor %}
+	<div class="form-group">
+		<div class="col-sm-offset-2 col-sm-10">
+			<button type="submit" class="btn btn-default delete">Удалить</button>
+			<button type="submit" class="btn btn-default" name="submit" value="saveandclose">Сохранить и
+				закрыть</button>
+			<button type="submit" class="btn btn-primary" name="submit" value="save">Сохранить</button>
+		</div>
+	</div>
+</form>
+
+{% endblock content %}
+
+{% block javascript %}
+{{ parent() }}
+
+<!-- Delete -->
+<script type="text/javascript">
+	$('.delete').on('click', function (e) {
+		e.preventDefault();
+		if (confirm('Вы уверены, что хотите удалить "{{ bean.title }}"?')) {
+			var f = document.createElement('form');
+			$(this).after(
+				$(f).attr({
+					method: 'post',
+					action: $(this).attr('href')
+				})
+					.append('<input type="hidden" name="_METHOD" value="DELETE"/>')
+					// CSRF
+					.append('<input type="hidden" name="{{ csrf.keys.name }}" value="{{ csrf.name }}">')
+					.append('<input type="hidden" name="{{ csrf.keys.value }}" value="{{ csrf.value }}">')
+			);
+			$(f).submit();
+		}
+	});
+</script>
+{% endblock javascript %}
