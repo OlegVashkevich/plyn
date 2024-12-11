@@ -1,10 +1,10 @@
 <?php
 
+use Plyn\Core\ErrorRenderer;
+use Plyn\Core\TwigCsrfExtension;
 use Slim\App;
 use Slim\Middleware\MethodOverrideMiddleware;
 use Slim\Views\TwigMiddleware;
-use Plyn\Core\ErrorRenderer;
-use Plyn\Core\TwigCsrfExtension;
 use Twig\Extension\DebugExtension;
 
 return function (App $app) {
@@ -24,9 +24,10 @@ return function (App $app) {
 
     // Добавляем сессии и флеш сообщения из них
     $app->add(
-        function ($request, $next) {
+        function ($request, $next) use ($app) {
             // Изменяем хранилище флэш-сообщений
-            $this->get('flash')->__construct($_SESSION);
+            // $this->get('flash')->__construct($_SESSION);
+            $app->getContainer()->get('flash')->__construct($_SESSION);
 
             return $next->handle($request);
         }
@@ -35,16 +36,16 @@ return function (App $app) {
     $app->add('csrf');
     // Добавляем расширения для Twig
     $app->add(
-        function ($request, $next) {
-            $this->get('view')->addExtension(new TwigCsrfExtension($this->get('csrf')));
-            $this->get('view')->addExtension(new DebugExtension());
+        function ($request, $next) use ($app) {
+            $app->getContainer()->get('view')->addExtension(new TwigCsrfExtension($app->getContainer()->get('csrf')));
+            $app->getContainer()->get('view')->addExtension(new DebugExtension());
+
             return $next->handle($request);
         }
     );
 
     // Добавляем промежуточное программное обеспечение базовой аутентификации HTTP.
     $app->add('auth');
-
 
     // Добавляем twig
     $app->add(

@@ -2,7 +2,7 @@
 
 namespace Plyn\Property;
 
-use RedBeanPHP\R as R;
+use RedBeanPHP\R;
 
 /**
  * Контроллер для свойства Plyn «один ко многим».
@@ -13,20 +13,19 @@ use RedBeanPHP\R as R;
  * Таким образом, в нашем примере в проекте Plyn модель Plyn Genre имеет отношение «один ко многим»
  * с моделью Plyn Book, а модель Plyn Book имеет отношение «многие к одному» с моделью Plyn Genre.
  */
-
 class Onetomany
 {
     /**
      * Метод set выполняется каждый раз, когда задается свойство этого типа.
      *
-     * @param bean $bean Объект bean Readbean для этого свойства.
-     * @param array $property Массив свойств модели Plyn.
-     * @param integer[] $new_value Массив с идентификаторами объектов,
-     * с которыми объект с этим свойством имеет отношение «один ко многим»
+     * @param bean  $bean      объект bean Readbean для этого свойства
+     * @param array $property  массив свойств модели Plyn
+     * @param int[] $new_value Массив с идентификаторами объектов,
+     *                         с которыми объект с этим свойством имеет отношение «один ко многим»
      *
-     * @return boolean Возвращает логическое значение, поскольку отношение «один ко многим» установлено только в
-     * bean с отношением «один ко многим».
-     * Возвращает true, если установлены какие-либо отношения, и false в противном случае.
+     * @return bool Возвращает логическое значение, поскольку отношение «один ко многим» установлено только в
+     *              bean с отношением «один ко многим».
+     *              Возвращает true, если установлены какие-либо отношения, и false в противном случае.
      */
     public function set($bean, $property, $new_value)
     {
@@ -34,27 +33,27 @@ class Onetomany
         $children = [];
 
         // Подключаем дочернюю модель для чтения свойств
-        $model_name = '\Plyn\Models\\' . ucfirst($property['module']) . '\\' . ucfirst($property['name']);
+        $model_name = '\Plyn\Models\\'.ucfirst($property['module']).'\\'.ucfirst($property['name']);
         $child = new $model_name();
 
         $relative_position = false;
         foreach ($child->properties as $p) {
-            if ($p['type'] === '\\Plyn\\Property\\Position' && $p['manytoone']) {
+            if ('\\Plyn\\Property\\Position' === $p['type'] && $p['manytoone']) {
                 $relative_position = true;
                 $position_property_name = $p['name'];
                 break;
             }
         }
 
-        if ($relative_position) {
+        if ($relative_position && isset($position_property_name)) {
             // Проверяем, изменился ли родитель детей.
             // Если да, обновляем все позиции для старого и нового родителя.
 
-            //$old_children = $bean->{ 'own'.ucfirst($property['name']).'List' };
+            // $old_children = $bean->{ 'own'.ucfirst($property['name']).'List' };
             $old_children = R::find(
                 $property['name'],
-                $bean->getMeta('type') . '_id = :id ORDER BY ' . $position_property_name . ' ASC ',
-                [ ':id' => $bean->id ]
+                $bean->getMeta('type').'_id = :id ORDER BY '.$position_property_name.' ASC ',
+                [':id' => $bean->id]
             );
             $old_children_ids = [];
             $position = 0;
@@ -64,7 +63,7 @@ class Onetomany
                 if (in_array($old_child->id, $new_value)) {
                     $old_child->{ $position_property_name } = $position;
                     $children[] = $old_child;
-                    $position++;
+                    ++$position;
 
                     // Создаем массив с идентификаторами для следующего шага
                     $old_children_ids[] = $old_child->id;
@@ -83,7 +82,7 @@ class Onetomany
                     $new_child = R::load($property['name'], $new_child_id);
                     $new_child->{ $position_property_name } = $bottom_position;
                     $children[] = $new_child;
-                    $bottom_position++;
+                    ++$bottom_position;
                 }
             }
         } else {
@@ -97,7 +96,7 @@ class Onetomany
 
         // Сохраняем
         if (count($children) > 0) {
-            $bean->{ 'own' . ucfirst($property['name']) . 'List' } = $children;
+            $bean->{ 'own'.ucfirst($property['name']).'List' } = $children;
             R::store($bean);
 
             return true;
@@ -109,19 +108,19 @@ class Onetomany
     /**
      * Метод read выполняется каждый раз при чтении свойства с этим типом.
      *
-     * @param bean $bean Объект bean Readbean для этого свойства.
-     * @param string[] $property Массив свойств модели Plyn.
+     * @param bean     $bean     объект bean Readbean для этого свойства
+     * @param string[] $property массив свойств модели Plyn
      *
-     * @return bean[] Массив с bean Redbean с отношением «многие к одному» с объектом с этим свойством.
+     * @return bean[] массив с bean Redbean с отношением «многие к одному» с объектом с этим свойством
      */
     public function read($bean, $property)
     {
         // ПРИМЕЧАНИЕ: Мы не выполняем метод чтения для каждого компонента.
-        //Прежде чем реализовать это, я хочу проверить потенциальные проблемы с производительностью.
-        //return  $bean->{ 'own'.ucfirst($property['name']).'List' };
+        // Прежде чем реализовать это, я хочу проверить потенциальные проблемы с производительностью.
+        // return  $bean->{ 'own'.ucfirst($property['name']).'List' };
 
         // Подключаем дочернюю модель для чтения свойств
-        $model_name = '\Plyn\Models\\' . ucfirst($property['module']) . '\\' . ucfirst($property['name']);
+        $model_name = '\Plyn\Models\\'.ucfirst($property['module']).'\\'.ucfirst($property['name']);
         $child = new $model_name();
 
         // Все beans с этим родителем
@@ -130,14 +129,15 @@ class Onetomany
         // Прежде чем реализовать это, я хочу проверить потенциальные проблемы с производительностью.
         $add_to_query = '';
         foreach ($child->properties as $p) {
-            if ($p['type'] === '\\Plyn\\Property\\Position') {
-                $add_to_query = $p['name'] . ' ASC, ';
+            if ('\\Plyn\\Property\\Position' === $p['type']) {
+                $add_to_query = $p['name'].' ASC, ';
             }
         }
+
         return R::find(
             $property['name'],
-            $bean->getMeta('type') . '_id = :id ORDER BY ' . $add_to_query . 'title ASC ',
-            [ ':id' => $bean->id ]
+            $bean->getMeta('type').'_id = :id ORDER BY '.$add_to_query.'title ASC ',
+            [':id' => $bean->id]
         );
     }
 
@@ -145,20 +145,21 @@ class Onetomany
      * Метод options возвращает все необязательные значения, которые может иметь это свойство,
      * но НЕ те, которые оно имеет в данный момент.
      *
-     * @param bean $bean Объект bean Readbean для этого свойства.
-     * @param array $property Массив свойств модели Plyn.
+     * @param bean  $bean     объект bean Readbean для этого свойства
+     * @param array $property массив свойств модели Plyn
      *
-     * @return bean[] Массив со всеми bean модели Plyn $property['name'].
+     * @return bean[] массив со всеми bean модели Plyn $property['name']
      */
     public function options($bean, $property)
     {
         if ($bean) {
             // Возвращает только бины с другим или текущим идентификатором $col_name
-            $col_name = $bean->getMeta('type') . '_id';
+            $col_name = $bean->getMeta('type').'_id';
+
             return R::find(
                 $property['name'],
-                ' ' . $col_name . ' != ? OR  ' . $col_name . ' IS NULL ',
-                [ $bean->id ]
+                ' '.$col_name.' != ? OR  '.$col_name.' IS NULL ',
+                [$bean->id]
             );
         } else {
             return R::findAll($property['name']);

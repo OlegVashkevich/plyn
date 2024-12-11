@@ -2,32 +2,30 @@
 
 namespace Plyn\Core;
 
-use RedBeanPHP\R as R;
+use RedBeanPHP\R;
 
 /**
  * Базовая модель Plyn для всех моделей Plyn.
  * Каждый тип контента имеет свою собственную модель, которая расширяет эту модель.
  * Каждая модель имеет тип, описание и свойства.
  * Правила проверки являются необязательными.
- *
  */
-
 class Model
 {
-    /** @var string $type Тип модели. Он такой же, как modelname в нижнем регистре, и определяет имя сущности RedBean и имя таблицы в базе данных. */
+    /** @var string Тип модели. Он такой же, как modelname в нижнем регистре, и определяет имя сущности RedBean и имя таблицы в базе данных. */
     protected $type;
 
-    /** @var string $description Описание модели, отображаемое в интерфейсе администратора. */
+    /** @var string Описание модели, отображаемое в интерфейсе администратора. */
     public $description;
 
-    /** @var array $properties Массив, определяющий различные поля данных содержимого модели. Каждое свойство представляет собой массив как минимум со следующими ключами: name, description, type, input. Могут быть и другие необязательные ключи. */
+    /** @var array Массив, определяющий различные поля данных содержимого модели. Каждое свойство представляет собой массив как минимум со следующими ключами: name, description, type, input. Могут быть и другие необязательные ключи. */
     public $properties;
 
     public $module;
 
     public function __construct()
     {
-        //достаем название модуля из пространства имен через рефлекию
+        // достаем название модуля из пространства имен через рефлекию
         $this->module = $this->getModule();
     }
 
@@ -38,13 +36,11 @@ class Model
      */
     protected function universalCreate()
     {
-
         $bean = R::dispense($this->type);
         $bean->created = R::isoDateTime();
 
         return $bean;
     }
-
 
     /**
      * Задает значения для сущности. Используется Create и Update.
@@ -52,13 +48,12 @@ class Model
      * Если да, он выполняет его.
      *
      * @param array $data Необработанные данные, обычно из Slim $request->getParsedBody()
-     * @param bean $bean
+     * @param bean  $bean
      *
-     * @return bean Сущность со значениями на основе $data.
+     * @return bean сущность со значениями на основе $data
      */
     public function set($data, $bean)
     {
-
         // Добавляем все свойства к сущности
         foreach ($this->properties as $property) {
             $value = false; // Нам нужно очистить возможное предыдущее значение $value
@@ -68,19 +63,17 @@ class Model
 
             // Новый данные для свойства
             if (
-                isset($data[ $property['name'] ])
-                ||
-                (isset($_FILES[ $property['name'] ]) && $_FILES[ $property['name'] ]['size'] > 0)
-                ||
-                $property['autovalue'] == true
+                isset($data[$property['name']])
+                || (isset($_FILES[$property['name']]) && $_FILES[$property['name']]['size'] > 0)
+                || true == $property['autovalue']
             ) {
                 // Проверяем, существует ли метод set для типа заданного свойства
                 if (method_exists($c, 'set')) {
-                    //добавлем название модуля
+                    // добавлем название модуля
                     $property['module'] = $this->module;
-                    $value = $c->set($bean, $property, $data[ $property['name'] ]);
+                    $value = $c->set($bean, $property, $data[$property['name']]);
                 } else {
-                    $value = $data[ $property['name'] ];
+                    $value = $data[$property['name']];
                 }
 
                 if ($value) {
@@ -104,9 +97,9 @@ class Model
             }
 
             // Проверяем обязательно ли свойство
-            if (isset($property['required'])) {
+            if (isset($property['required']) && isset($hasvalue)) {
                 if ($property['required'] && !$hasvalue) {
-                    throw new \Exception('Ошибка проверки. ' . $property['description'] . ' обязательно.');
+                    throw new \Exception('Ошибка проверки. '.$property['description'].' обязательно.');
                 }
             }
 
@@ -115,10 +108,9 @@ class Model
             if (!is_bool($value)) {
                 // Проверяем является ли значение свойства уникальным
                 if (isset($property['unique'])) {
-                    $duplicate = R::findOne($this->type, $property['name'] . ' = :val ', [ ':val' => $value ]);
+                    $duplicate = R::findOne($this->type, $property['name'].' = :val ', [':val' => $value]);
                     if ($duplicate && $duplicate->id != $bean->id) {
-                        throw new \Exception('Ошибка проверки. '
-                            . $property['description'] . ' должно быть уникально.');
+                        throw new \Exception('Ошибка проверки. '.$property['description'].' должно быть уникально.');
                     }
                 }
                 $bean->{ $property['name'] } = $value;
@@ -131,20 +123,18 @@ class Model
         return $bean;
     }
 
-
     // CRUD:
     // Методы Create, Read, Update и Delete
 
     /**
-     * Create
+     * Create.
      *
-     * @param array $data Необработанные данные для создания сущности Redbeean.
+     * @param array $data необработанные данные для создания сущности Redbeean
      *
-     * @return bean Новая запись со значениями на основе $data.
+     * @return bean новая запись со значениями на основе $data
      */
     public function create($data)
     {
-
         // Create
         $bean = $this->universalCreate();
 
@@ -159,28 +149,27 @@ class Model
     }
 
     /**
-     * Read
+     * Read.
      *
      * Поиск bean-компонента по уникальному свойству, например, идентификатору или символьному коду.
      * Если $value не задано, он возвращает все bean-компоненты этого типа.
      *
      * @param mixed $value Значение свойства
-     * @param string $property Имя свойства, по умолчанию id
      *
-     * @return mixed Может возвращать один bean-компонент или массив bean-компонентов, если $value не задано.
+     * @return mixed может возвращать один bean-компонент или массив bean-компонентов, если $value не задано
      */
     public function read($value = false, $property_name = 'id')
     {
         if ($value) {
             // Один bean-компонент
-            $bean = R::findOne($this->type, $property_name . ' = :value ', [ ':value' => $value ]);
+            $bean = R::findOne($this->type, $property_name.' = :value ', [':value' => $value]);
             if (!$bean) {
-                throw new \Exception('Модель ' . $this->type . ' не существует.');
+                throw new \Exception('Модель '.$this->type.' не существует.');
             }
 
             // Проверяем методы чтения, специфичные для типа свойства
             foreach ($this->properties as $property) {
-                //добавлем название модуля
+                // добавлем название модуля
                 $property['module'] = $this->module;
                 // Проверяем, существует ли определенный метод чтения свойства
                 $c = new $property['type']();
@@ -188,6 +177,7 @@ class Model
                     $bean->{ $property['name'] } = $c->read($bean, $property);
                 }
             }
+
             return $bean;
         } else {
             // Все bean-компоненты этого типа
@@ -196,45 +186,47 @@ class Model
             // Перед тем, как реализовать это, я хочу проверить потенциальные проблемы с производительностью.
             $add_to_query = '';
             foreach ($this->properties as $property) {
-                if ($property['type'] === '\\Plyn\\Property\\Position') {
-                    $add_to_query = $property['name'] . ' ASC, ';
+                if ('\\Plyn\\Property\\Position' === $property['type']) {
+                    $add_to_query = $property['name'].' ASC, ';
                 }
             }
-            return R::findAll($this->type, ' ORDER BY ' . $add_to_query . 'title ASC ');
+
+            return R::findAll($this->type, ' ORDER BY '.$add_to_query.'title ASC ');
         }
     }
 
     /**
-     * Update
+     * Update.
      *
      * Обновляет данные bean-компонента.
      *
-     * @param array $data Необработанные данные для создания bean-компонента Redbeean.
-     * @param integer $id
+     * @param array $data необработанные данные для создания bean-компонента Redbeean
+     * @param int   $id
      *
-     * @return bean Компонент с обновленными значениями на основе $data.
+     * @return bean компонент с обновленными значениями на основе $data
      */
     public function update($data, $id)
     {
-        $bean = R::findOne($this->type, ' id = :id ', [ ':id' => $id ]);
+        $bean = R::findOne($this->type, ' id = :id ', [':id' => $id]);
         if (!$bean) {
-            throw new \Exception('Модель ' . $this->type . ' не существует.');
+            throw new \Exception('Модель '.$this->type.' не существует.');
         }
+
         return $this->set($data, $bean);
     }
 
     /**
-     * Delete
+     * Delete.
      *
      * Удаление bean-компонента
      *
-     * @param integer $id
+     * @param int $id
      */
     public function delete($id)
     {
-        $bean = R::findOne($this->type, ' id = :id ', [ ':id' => $id ]);
+        $bean = R::findOne($this->type, ' id = :id ', [':id' => $id]);
         if (!$bean) {
-            throw new \Exception('Модель ' . $this->type . ' не существует.');
+            throw new \Exception('Модель '.$this->type.' не существует.');
         }
 
         // Проверяем методы удаления, специфичные для типа свойства
@@ -247,12 +239,10 @@ class Model
         R::trash($bean);
     }
 
-
-
     // МЕТОДЫ ПОМОШНИКИ
 
     /**
-     * Заполнение свойств
+     * Заполнение свойств.
      *
      * Свойства могут иметь необязательные значения, например relation и file_select.
      * Этот метод, если применимо, запрашивает свойства для необязательных значений и заполняет их ими.
@@ -260,14 +250,13 @@ class Model
      * Если $value не задано, bean-компонент не предоставляется методу параметров свойства.
      *
      * @param mixed $value Значение свойства
-     * @param string $property Имя свойства, по умолчанию id
      */
     public function populateProperties($value = false, $property_name = 'id')
     {
         if ($value) {
-            $bean = R::findOne($this->type, $property_name . ' = :value ', [ ':value' => $value ]);
+            $bean = R::findOne($this->type, $property_name.' = :value ', [':value' => $value]);
             if (!$bean) {
-                throw new \Exception('Модель ' . $this->type . ' не существует.');
+                throw new \Exception('Модель '.$this->type.' не существует.');
             }
         } else {
             $bean = false;
@@ -284,6 +273,7 @@ class Model
     public function getModule()
     {
         $namespace = explode('\\', (new \ReflectionClass($this))->getNamespaceName());
+
         return end($namespace);
     }
 }
