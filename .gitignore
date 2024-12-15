@@ -4,6 +4,7 @@
 .Trashes
 ehthumbs.db
 Thumbs.db
+.idea/*
 
 vendor/*
 storage/cache/*
