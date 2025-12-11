@@ -4,7 +4,9 @@ namespace Plyn\Controllers;
 
 use Plyn\Core\EntityProvider;
 use Plyn\Core\Search;
+use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use RedBeanPHP\R;
@@ -12,7 +14,7 @@ use Slim\Routing\RouteContext;
 
 class Admin
 {
-    private $container;
+    private ContainerInterface $container;
 
     public function __construct(ContainerInterface $container)
     {
@@ -22,15 +24,8 @@ class Admin
     /**
      * Перенаправление на нужную страницу после сохранения bean-компонента.
      *
-     * @var object   Slim контейнер
-     * @var object   RedBean bean
-     * @var array    Post data
-     * @var object   объект ответа Slim
-     * @var string[] Массив с аргументами из маршрута Slim
-     *
-     * @return object Slim ответ
      */
-    private function redirectAfterSave($request, $bean, $data, $response, $args)
+    private function redirectAfterSave($request, $bean, $data, $response, $args): ResponseInterface
     {
         if ('saveandclose' == $data['submit']) {
             return $response->withStatus(302)->withHeader(
@@ -47,9 +42,13 @@ class Admin
         }
     }
 
+    /**
+     * @throws NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
+     */
     public function main(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
     {
-        $beantypes = EntityProvider::getBeantypes($this->container->get('settings')['path'].'/src', 'Example');
+        $beantypes = EntityProvider::getBeantypes($this->container->get('settings')['path'] . '/src', 'Example');
 
         $dashboard = [];
 
@@ -59,8 +58,12 @@ class Admin
             $dashboard[$beantype]['created'] = R::findOne($beantype, ' ORDER BY created DESC ');
             $dashboard[$beantype]['modified'] = R::findOne($beantype, ' ORDER BY modified DESC ');
 
-            $c = EntityProvider::setupBeanModel($this->container
-                ->get('settings')['path'].'/src', 'Example', $beantype);
+            $c = EntityProvider::setupBeanModel(
+                $this->container
+                    ->get('settings')['path'] . '/src',
+                'Example',
+                $beantype
+            );
             $dashboard[$beantype]['description'] = $c->description;
         }
 
@@ -78,13 +81,20 @@ class Admin
         $data['flash'] = $this->container->get('flash')->getMessages();
 
         try {
-            $c = EntityProvider::setupBeanModel($this->container
-                ->get('settings')['path'].'/src', 'Example', $args['beantype']);
+            $c = EntityProvider::setupBeanModel(
+                $this->container
+                    ->get('settings')['path'] . '/src',
+                'Example',
+                $args['beantype']
+            );
 
             $data['beantype'] = $args['beantype'];
             $data['description'] = $c->description;
-            $data['beantypes'] = EntityProvider::getBeantypes($this->container
-                ->get('settings')['path'].'/src', 'Example');
+            $data['beantypes'] = EntityProvider::getBeantypes(
+                $this->container
+                    ->get('settings')['path'] . '/src',
+                'Example'
+            );
             $data['properties'] = $c->properties;
 
             $query = $request->getQueryParams();
@@ -94,7 +104,7 @@ class Admin
                 if ('\\Plyn\\Property\\Position' === $property['type'] && !isset($property['manytoone'])) {
                     // Устанавливаем сортировку по умолчанию
                     if (!isset($query['sort'])) {
-                        $query['sort'] = $property['name'].'*asc';
+                        $query['sort'] = $property['name'] . '*asc';
                     }
 
                     // Устанавливаем сортировку в веб-интерфейсе
@@ -130,8 +140,12 @@ class Admin
         ResponseInterface $response,
         array $args,
     ): ResponseInterface {
-        $c = EntityProvider::setupBeanModel($this->container
-            ->get('settings')['path'].'/src', 'Example', $args['beantype']);
+        $c = EntityProvider::setupBeanModel(
+            $this->container
+                ->get('settings')['path'] . '/src',
+            'Example',
+            $args['beantype']
+        );
         $c->populateProperties();
 
         // Показываем форму
@@ -140,8 +154,11 @@ class Admin
             'beantype' => $args['beantype'],
             'beanproperties' => $c->properties,
             'flash' => $this->container->get('flash')->getMessages(),
-            'beantypes' => EntityProvider::getBeantypes($this->container
-                ->get('settings')['path'].'/src', 'Example'),
+            'beantypes' => EntityProvider::getBeantypes(
+                $this->container
+                    ->get('settings')['path'] . '/src',
+                'Example'
+            ),
         ]);
     }
 
@@ -150,8 +167,12 @@ class Admin
         ResponseInterface $response,
         array $args,
     ): ResponseInterface {
-        $c = EntityProvider::setupBeanModel($this->container
-            ->get('settings')['path'].'/src', 'Example', $args['beantype']);
+        $c = EntityProvider::setupBeanModel(
+            $this->container
+                ->get('settings')['path'] . '/src',
+            'Example',
+            $args['beantype']
+        );
         $c->populateProperties($args['id']);
 
         // Показываем заполненную форму
@@ -161,7 +182,7 @@ class Admin
             'beanproperties' => $c->properties,
             'bean' => $c->read($args['id']),
             'flash' => $this->container->get('flash')->getMessages(),
-            'beantypes' => EntityProvider::getBeantypes($this->container->get('settings')['path'].'/src', 'Example'),
+            'beantypes' => EntityProvider::getBeantypes($this->container->get('settings')['path'] . '/src', 'Example'),
         ]);
     }
 
@@ -170,13 +191,17 @@ class Admin
         ResponseInterface $response,
         array $args,
     ): ResponseInterface {
-        $c = EntityProvider::setupBeanModel($this->container
-            ->get('settings')['path'].'/src', 'Example', $args['beantype']);
+        $c = EntityProvider::setupBeanModel(
+            $this->container
+                ->get('settings')['path'] . '/src',
+            'Example',
+            $args['beantype']
+        );
         $data = $request->getParsedBody();
         try {
             $bean = $c->create($data);
             // Перенаправление к обзору или заполненной форме
-            $this->container->get('flash')->addMessage('success', $bean->title.' is added.');
+            $this->container->get('flash')->addMessage('success', $bean->title . ' is added.');
 
             return $this->redirectAfterSave($request, $bean, $data, $response, $args);
         } catch (\Exception $e) {
@@ -195,14 +220,18 @@ class Admin
         ResponseInterface $response,
         array $args,
     ): ResponseInterface {
-        $c = EntityProvider::setupBeanModel($this->container
-            ->get('settings')['path'].'/src', 'Example', $args['beantype']);
+        $c = EntityProvider::setupBeanModel(
+            $this->container
+                ->get('settings')['path'] . '/src',
+            'Example',
+            $args['beantype']
+        );
         $data = $request->getParsedBody();
         try {
             $bean = $c->update($data, $args['id']);
 
             // Перенаправление к обзору или заполненной форме
-            $this->container->get('flash')->addMessage('success', $bean->title.' is updated.');
+            $this->container->get('flash')->addMessage('success', $bean->title . ' is updated.');
 
             return $this->redirectAfterSave($request, $bean, $data, $response, $args);
         } catch (\Exception $e) {
@@ -221,11 +250,15 @@ class Admin
         ResponseInterface $response,
         array $args,
     ): ResponseInterface {
-        $c = EntityProvider::setupBeanModel($this->container
-            ->get('settings')['path'].'/src', 'Example', $args['beantype']);
+        $c = EntityProvider::setupBeanModel(
+            $this->container
+                ->get('settings')['path'] . '/src',
+            'Example',
+            $args['beantype']
+        );
         try {
             $c->delete($args['id']);
-            $this->container->get('flash')->addMessage('success', 'The '.$args['beantype'].' is deleted.');
+            $this->container->get('flash')->addMessage('success', 'The ' . $args['beantype'] . ' is deleted.');
         } catch (\Exception $e) {
             $this->container->get('flash')->addMessage('error', $e->getMessage());
         }
