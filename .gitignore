@@ -17,6 +17,7 @@ public/uploads/*
 
 !storage/cache/.gitkeep
 !storage/db/.gitkeep
+!storage/db/example.db
 !storage/logs/.gitkeep
 
 composer.lock

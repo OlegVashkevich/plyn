@@ -11,7 +11,7 @@ R::setup(
     /*'mysql:host='.$db_config['servername'].';dbname='.$db_config['database'],
     $db_config['username'],
     $db_config['password']*/
-    'sqlite:' . __DIR__ . '/../storage/db/sqlite.db'
+    'sqlite:' . __DIR__ . '/../storage/db/example.db'
 );
 
 
